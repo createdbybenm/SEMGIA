@@ -1,0 +1,14 @@
+# Only tool config. Dependencies live in requirements.txt (keep it simple).
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["semgia", "train", "make_mock_samples"]
