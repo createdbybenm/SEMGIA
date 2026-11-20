@@ -10,7 +10,7 @@
                                                                      ▼
  LOCAL – web interface (recording)  /  scripts/record.py (backup) + semgia/ (AI) ────
    always:  Source.read() → Windower (200 ms / 100 ms) → features (− window mean; RMS, MAV, WL, ZC)
-            → ÷ rest baseline → Model.predict → Smoother → "AI says: ..." + live plot
+            → ÷ rest baseline → Model.predict → Smoother → "REST" / "CONTRACTION" + live plot
    button "Collect sample" → metadata form → SampleRecorder (24 s):
             label from timer → data/raw/sample_NNN/{metadata.json, signal.csv, predictions.csv}
             └─► AzureUploader (background thread, every 2 s, never raises)

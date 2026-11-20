@@ -182,9 +182,9 @@ def run_gui(app: App, scale: float = 1.0) -> None:
             last_cue[0] = cue
         pred = app.predictor.pred
         if app.predictor.calib is None:
-            ai_lbl.configure(text="AI: waiting for a rest baseline (first 8 s of a sample)", fg="gray")
+            ai_lbl.configure(text="Calibrating – stay relaxed", fg="gray")
         else:
-            ai_lbl.configure(text=f"AI says: {'CONTRACTION' if pred == config.CONTRACT else 'rest'}",
+            ai_lbl.configure(text="CONTRACTION" if pred == config.CONTRACT else "REST",
                              fg="red" if pred == config.CONTRACT else "green")
         status_lbl.configure(text=app.status)
         line.set_ydata(app.plot_buf)
