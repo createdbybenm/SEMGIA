@@ -10,7 +10,7 @@ python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\
 pip install -r requirements.txt
 cp .env.example .env                                     # paste the Azure key (optional)
 ```
-Repo owner, once: Settings → Branches → add rule for `main`: *Require a pull request (1 approval)*,
+Repo owner, once: Settings → Branches → add rule for `main`: *Require a pull request (0 approvals)*,
 *Require status checks (CI)*. Settings → General → allow only **Squash merging**, enable *Automatically delete head branches*.
 
 ## Every task
@@ -23,7 +23,7 @@ git add -A && git commit -m "Add serial reader"
 git push -u origin ben/serial-reader
 gh pr create --fill                          # or click "Compare & pull request" on GitHub
 ```
-Someone else reviews → *Squash and merge* → the branch gets deleted.
+CI green + no conflicts → *Squash and merge* (or `/gitup merge`) → the branch gets deleted. No approval needed.
 
 ## Every morning (when your branch is older than a day)
 ```

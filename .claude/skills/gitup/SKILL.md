@@ -1,7 +1,7 @@
 ---
 name: gitup
-description: Start or finish a SEMGIA task with Git the team's way (branch per task, checks, commit with a why, push, PR). Use when a teammate types /gitup start <task>, /gitup end, /gitup sync or /gitup status.
-argument-hint: "start <short-task> | end | sync | status"
+description: Start or finish a SEMGIA task with Git the team's way (branch per task, checks, commit with a why, push, PR, squash merge). Use when a teammate types /gitup start <task>, /gitup end, /gitup merge, /gitup sync or /gitup status.
+argument-hint: "start <short-task> | end | merge | sync | status"
 disable-model-invocation: true
 ---
 
@@ -48,8 +48,17 @@ Shared files (`CLAUDE.md`, `MEMORY.md`, `docs/course/requirements.md`): small ed
    (what + why + tested) and show it. Commit.
 6. `git push -u origin <branch>`.
 7. PR: `gh pr create --base main` with the template in `.github/pull_request_template.md` filled in (What, Closes #,
-   How I tested it, checklist). No `gh` → give the GitHub "Compare & pull request" link. Tell the user: 1 review by a
-   teammate, then **Squash and merge**.
+   How I tested it, checklist). No `gh` → give the GitHub "Compare & pull request" link and stop.
+8. Merge: continue with `merge` below. No teammate approval needed (team rule since 2026-11-19).
+
+## `merge` (the AI is the housekeeper: it merges when every gate is green)
+Gates, all required. Any gate fails → stop, show why, ask the user. Never merge around a gate.
+1. Ownership + secrets checks of `end` passed (no foreign files without the user's OK, nothing secret).
+2. `main` moved since the branch started? → run `sync` first (conflicts → ask, never guess).
+3. CI green: `gh pr checks <pr> --watch` (wait for it; red → stop, offer to fix).
+4. No conflicts: `gh pr view <pr> --json mergeable,mergeStateStatus` → `MERGEABLE` and `CLEAN`.
+Then: `gh pr merge <pr> --squash --delete-branch` → `git switch main && git pull` → tell the user the merge commit
+and that teammates get it with `git pull`.
 
 ## `sync` (branch older than a day, or `main` moved)
 `git fetch` → `git switch main && git pull` → `git switch <branch> && git merge main`. Conflict → show files,
