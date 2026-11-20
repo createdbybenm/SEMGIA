@@ -3,6 +3,7 @@
 | Script | Does | Example |
 |---|---|---|
 | `record.py` | recording app: live plot + AI, "Collect sample" button, metadata form, 24 s cues | `python scripts/record.py --source mock` |
+| `import_web.py` | web-interface downloads (`semgia_*.json`) → `data/raw/sample_NNN/`, `calibration_EXX/` | `python scripts/import_web.py` |
 | `make_mock_samples.py` | fake samples instantly → `data/synthetic/` (5 placements × 10) | `python scripts/make_mock_samples.py` |
 | `train.py` | clean windows of all **train** samples → `models/model.joblib` (`--kind logreg\|lda\|forest`) | `python scripts/train.py --data data/synthetic` |
 | `evaluate.py` | leave-one-placement-out on train placements: threshold floor vs. logreg/lda/forest; `--final` = test once; `--out x.md` | `python scripts/evaluate.py` |

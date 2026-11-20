@@ -6,14 +6,24 @@ sample counter (time = row / FS) and config.SAMPLE_STEPS - never from the PC clo
 from what the person did.
 """
 
+import json
 import logging
+from pathlib import Path
 
 import numpy as np
 
 from semgia import config
-from semgia.model import Smoother
+from semgia.model import Smoother, ThresholdModel
 from semgia.processing import Calibration, Filter, Windower, features
-from semgia.storage import AzureUploader, LocalWriter
+from semgia.storage import (
+    OPERATOR_RE,
+    PLACEMENT_RE,
+    SUBJECT_RE,
+    AzureUploader,
+    LocalWriter,
+    list_samples,
+    make_metadata,
+)
 
 log = logging.getLogger(__name__)
 
@@ -108,3 +118,87 @@ class SampleRecorder:
     def close(self) -> None:
         self.writer.close()
         self.uploader.close()
+
+
+# --- Files downloaded by the web interface (ESP32 page, HamShot_EMG/pagina.h) ---
+WEB_SAMPLE_FORMAT = "semgia-sample-1"
+WEB_CALIB_FORMAT = "semgia-calib-1"
+CHOICES = {"muscle": config.MUSCLES, "side": config.SIDES, "effort": config.EFFORTS,
+           "condition": config.CONDITIONS}
+
+
+def save_web_sample(payload: dict, root: Path = config.DATA_RAW, model=None,
+                    upload: bool = False) -> Path | None:
+    """One downloaded web sample -> data/raw/sample_NNN/, written by SampleRecorder exactly like record.py.
+
+    The values are replayed through LivePredictor + SampleRecorder, so signal.csv (labels from the
+    row number), predictions.csv and the optional Azure upload are identical to a live recording.
+    Returns the new folder, or None if this recording (same placement + start_time_utc) was already
+    imported. Raises ValueError if the file is incomplete or the metadata is wrong.
+    upload=True also sends it to Azure (best effort, never raises; needs the .env connection string).
+    """
+    if payload.get("format") != WEB_SAMPLE_FORMAT:
+        raise ValueError(f"not a web sample (format {payload.get('format')!r})")
+    fields = {k: v for k, v in payload["metadata"].items() if k != "sample_id"}
+    values = np.asarray(payload["values"], dtype=float)
+    if len(values) != SAMPLE_N:
+        raise ValueError(f"sample has {len(values)} rows, expected {SAMPLE_N} (aborted?)")
+    adc_max = 2 ** config.ADC_BITS - 1
+    if values.min() < 0 or values.max() > adc_max:
+        raise ValueError(f"values outside 0..{adc_max}: not raw ADC counts (old web page / firmware?)")
+    if int(fields.get("sampling_rate_hz", 0)) != config.FS:
+        raise ValueError(f"sampling_rate_hz {fields.get('sampling_rate_hz')} != config.FS {config.FS}")
+    for key, allowed in CHOICES.items():
+        if fields.get(key) not in allowed:
+            raise ValueError(f"{key}={fields.get(key)!r} is not one of {allowed} (web page out of date?)")
+    for d in list_samples(root):
+        old = json.loads((d / "metadata.json").read_text())
+        if (old.get("start_time_utc"), old.get("placement_id")) == (fields.get("start_time_utc"),
+                                                                    fields.get("placement_id")):
+            return None
+    meta = make_metadata(root=root, **fields)   # privacy gate: P001 / OP01 / E01
+    predictor = LivePredictor(model or ThresholdModel())
+    rec = SampleRecorder(meta, predictor.total, root, AzureUploader(meta, conn_str=None if upload else ""))
+    for start in range(0, SAMPLE_N, config.STEP):   # same chunking as a live stream
+        x = values[start:start + config.STEP]
+        rec.push(x, predictor.push(x))
+        if rec.calib is not None:
+            predictor.calib = rec.calib
+    rec.close()
+    return rec.writer.dir
+
+
+def save_web_calibration(payload: dict, root: Path = config.DATA_RAW) -> Path | None:
+    """One downloaded web calibration -> data/raw/calibration_EXX/{calibration.json, calibration.csv}.
+
+    calibration.csv = t_s,value,step (step: 0 prepare, 1 rest, 2 max contraction, 3 calculating).
+    Returns None if this calibration was already imported. Raises ValueError if the placement
+    already has a different calibration (delete the folder by hand to replace it).
+    """
+    if payload.get("format") != WEB_CALIB_FORMAT:
+        raise ValueError(f"not a web calibration (format {payload.get('format')!r})")
+    id_rules = (("subject_id", SUBJECT_RE), ("operator_id", OPERATOR_RE), ("placement_id", PLACEMENT_RE))
+    for key, regex in id_rules:
+        if not regex.match(str(payload.get(key, ""))):
+            raise ValueError(f"bad {key} {payload.get(key)!r} (pseudonyms only: P001 / OP01 / E01)")
+    if int(payload.get("sampling_rate_hz", 0)) != config.FS:
+        raise ValueError(f"sampling_rate_hz {payload.get('sampling_rate_hz')} != config.FS {config.FS}")
+    values, steps = payload["values"], payload["steps"]
+    if len(values) != len(steps) or not values:
+        raise ValueError("calibration values/steps are empty or of different length")
+    info = {k: payload[k] for k in ("placement_id", "subject_id", "operator_id", "start_time_utc",
+                                    "sampling_rate_hz", "rest_mV", "max_mV")}
+    folder = Path(root) / f"calibration_{info['placement_id']}"
+    if folder.exists():
+        old = json.loads((folder / "calibration.json").read_text())
+        if old.get("start_time_utc") == info["start_time_utc"]:
+            return None
+        raise ValueError(f"{folder} already exists (another calibration of this placement). "
+                         "Delete it by hand to replace it, or use a new placement ID.")
+    folder.mkdir(parents=True)
+    (folder / "calibration.json").write_text(json.dumps(info, indent=2))
+    with open(folder / "calibration.csv", "w") as f:
+        f.write("t_s,value,step\n")
+        for i, (v, s) in enumerate(zip(values, steps)):
+            f.write(f"{i / config.FS:.3f},{int(v)},{int(s)}\n")
+    return folder
