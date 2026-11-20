@@ -66,6 +66,8 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - Azure: not set up yet. Upload + dashboard code tested offline / local mode only.
 
 ## Known problems / gotchas
+- 2026-11-20 – Demo fallback = `record.py --source file --file data/raw/sample_NNN/signal.csv`: replays a real
+  sample, saves to `data/demo/` (gitignored), no upload. Dashboard `STEPS` must stay equal to `config.SAMPLE_STEPS`.
 - 2026-11-20 – Web recording: keep the page in the foreground during a sample. If the browser falls > 8 s behind
   the ESP32 buffer the sample is aborted (nothing saved) → just repeat it. Page constants must match config.py
   (import_web.py rejects unknown dropdown values / other FS).

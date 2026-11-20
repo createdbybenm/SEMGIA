@@ -91,6 +91,10 @@ class FileSource(Source):
         self.pos += n
         return self.values[idx]
 
+    def rewind(self) -> None:
+        """Start the file again, so a demo sample's cues line up with the recorded phases."""
+        self.pos, self.t_last = 0, time.monotonic()
+
 
 class SerialSource(Source):
     """Reads one integer per line from the Arduino (see firmware/)."""

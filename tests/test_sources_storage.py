@@ -177,3 +177,17 @@ def test_web_calibration_is_saved_per_placement_and_not_a_sample(tmp_path):
         save_web_calibration({**cal, "start_time_utc": "2026-11-20T11:00:00+00:00"}, tmp_path)
     with pytest.raises(ValueError):
         save_web_calibration({**cal, "placement_id": "E02", "subject_id": "Anna"}, tmp_path)
+
+
+def test_file_source_rewind_restarts_the_replay(tmp_path):
+    """Demo fallback: 'Collect sample' rewinds the file, so the cues match the recorded phases."""
+    from semgia.sources import FileSource
+    csv = tmp_path / "signal.csv"
+    pd.DataFrame({"t_s": [0, 0.001, 0.002], "value": [10, 20, 30], "label": 0}).to_csv(csv, index=False)
+    src = FileSource(csv)
+    time.sleep(0.01)
+    assert len(src.read()) > 0 and src.pos > 0
+    src.rewind()
+    assert src.pos == 0
+    time.sleep(0.002)
+    assert src.read()[0] == 10                          # starts at the first value again
