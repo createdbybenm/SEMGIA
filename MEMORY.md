@@ -13,7 +13,9 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
   background. Checklist + owners: `docs/course/requirements.md`. Build only what serves it.
 - 2026-11-19 BM – **Every recording (train AND test sessions) stays in `data/raw/`**, marked `set = train|test` in
   `data/metadata.csv` (the PDF; the slides said "test only in Azure", PDF wins). Choose on train only, test once at the end.
-- 2026-11-19 BM – Mains notch is **60 Hz** (Mexico): analog notch in the front end + software `NOTCH_HZ = 60`, Q 30 (safety net).
+- 2026-11-19 BM – No digital filter: analog front end = band-pass 20-447 Hz + 60 Hz notch; software only subtracts
+  each window's mean (ESP32 offset ~2048).
+- 2026-11-19 BM – Microcontroller = **ESP32**, 12-bit ADC (0..4095), `ADC_BITS = 12`.
 - 2026-11-19 BM – Dashboard stays in the cloud (Azure). Colab = course documentation / project notebook (split still open).
 - 2026-11-19 BM – Team skills in `.claude/skills/`: /gitup, /calib, /docit, /audit. Edit them via PR like code.
 - 2026-11-19 BM – Git: own short-lived branch per task (`name/task`), PR to main within 1–2 days. Shared AI context
@@ -48,8 +50,8 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - Repo scaffold merged: pipeline, tests, CI, docs, mock data, Python recording GUI, dashboard (local mode).
 - **Calibration in code is still per-sample** (`processing.sample_dataset` uses the sample's first rest phase).
   Per-placement calibration still blocked: needs the web interface's calibration file format. Change point: `sample_calibration`.
-- Web interface: codebase will be shared → then adapt it (sample button, markers, folder output).
-- Hardware: real acquisition about to start. Firmware sketch untested on hardware.
+- Recording: the team's dashboard connected to the ESP32 already saves CSVs; a teammate adds the sample-recording feature.
+- Hardware: real acquisition about to start. `firmware/emg_serial/emg_serial.ino` is written for an Arduino Uno (0..1023), not the ESP32.
 - AI: fair-split evaluation (`evaluate.py`, `--final` = test once), smoothed score, fresh/fatigued split done. Runs on
   mock data only (scores ≈ 1.0, meaningless). Final model + TRIM_S/threshold check wait for real data (`first_look.py` ready).
 - Azure: not set up yet. Upload + dashboard code tested offline / local mode only.
@@ -68,7 +70,8 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - Warning cue before the contraction (`warning_s`)? Currently 0 s.
 - Professor's GitHub user, to add as collaborator. Member codes M01–M04: who is who?
 - Web interface: where is the repo, what does it save today (format of calibration + recordings), how are markers set?
-- Raw output or envelope from the sensor? Which microcontroller? → decides FS and RAW_SIGNAL.
+- Raw output or envelope from the sensor? → decides RAW_SIGNAL.
+- FS = 1000 Hz on the ESP32? Confirm in the firmware (P1).
 - Which muscle? (default: biceps brachii right)
 - The consent form MUST allow storing data on GitHub (Report 1 requires every recording in `data/raw/`). Check the wording.
 - Is TRIM_S = 1.5 s right? Check on real train data with `scripts/first_look.py` (literature: onset ≈ 0.33 s after cue).

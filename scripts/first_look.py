@@ -5,9 +5,10 @@ Questions it answers:
     "clean" windows really in steady rest / steady contraction?
   - THRESHOLD_ON / OFF (3x / 2x rest): does RMS/rest cross them in the contraction
     and stay below them in rest?
-Top:    filtered signal, contraction (timer label) shaded orange, clean windows as a green bar at the bottom.
+Top:    raw ADC value (no digital filter; ESP32 rest ~2048), contraction (timer label) shaded orange,
+        clean windows as a green bar at the bottom.
 Bottom: RMS / rest baseline per window (log scale) with the ON/OFF threshold lines.
-Uses the same processing as training (Filter, window_features, clean_mask, sample_calibration).
+Uses the same processing as training (window_features, clean_mask, sample_calibration).
 
     python scripts/first_look.py                                       # first 3 samples in data/raw
     python scripts/first_look.py --samples sample_004 sample_017 --out figures/first_look
@@ -25,7 +26,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from semgia import config  # noqa: E402
-from semgia.processing import Filter, clean_mask, sample_calibration, window_features  # noqa: E402
+from semgia.processing import clean_mask, sample_calibration, window_features  # noqa: E402
 from semgia.storage import list_samples, load_sample  # noqa: E402
 
 
@@ -45,7 +46,7 @@ def plot_sample(sample_dir: Path, out_dir: Path) -> Path:
     clean = clean_mask(ends, changes, len(labels))
 
     fig, (top, bottom) = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
-    top.plot(t, Filter().process(values), lw=0.4, color="black")
+    top.plot(t, values, lw=0.4, color="black")
     for a, b in runs(labels == config.CONTRACT):
         top.axvspan(t[a], t[b], color="orange", alpha=0.25, label="contract (timer)")
     for a, b in runs(clean):   # clean window a..b covers [ends[a] - WINDOW, ends[b]]
@@ -54,7 +55,7 @@ def plot_sample(sample_dir: Path, out_dir: Path) -> Path:
     handles, names = top.get_legend_handles_labels()
     unique = dict(zip(names, handles))   # one legend entry per name, not one per span
     top.legend(unique.values(), unique.keys(), loc="upper right")
-    top.set_ylabel("filtered value")
+    top.set_ylabel("ADC value")
     top.set_title(f"{meta['sample_id']}  {meta.get('placement_id', '')}  "
                   f"{meta.get('effort', '')}  {meta.get('condition', '')}")
 

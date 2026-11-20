@@ -5,11 +5,11 @@
 
 ```
  ┌──────────┐  analog  ┌──────────────┐  USB serial "<int>\n" @ 1 kHz
- │EMG sensor├─────────►│ Arduino (A0) ├──────────────────────────────┐
+ │EMG sensor├─────────►│ ESP32 12-bit ├──────────────────────────────┐
  └──────────┘          └──────────────┘                              │
                                                                      ▼
  LOCAL – web interface (recording)  /  scripts/record.py (backup) + semgia/ (AI) ────
-   always:  Source.read() → Filter → Windower (200 ms / 100 ms) → features (RMS, MAV, WL, ZC)
+   always:  Source.read() → Windower (200 ms / 100 ms) → features (− window mean; RMS, MAV, WL, ZC)
             → ÷ rest baseline → Model.predict → Smoother → "AI says: ..." + live plot
    button "Collect sample" → metadata form → SampleRecorder (24 s):
             label from timer → data/raw/sample_NNN/{metadata.json, signal.csv, predictions.csv}
@@ -70,9 +70,10 @@ It is not fixed: evaluate.py compares the models below and real data decides (so
 - Rejected samples (`QUALITY-REPORT.md`, `scripts/check_quality.py`) are skipped by train + evaluate.
 
 ## Filters
-The analog front end has a **60 Hz notch** (Mexico mains). Software (`processing.Filter`, causal):
-band-pass 20–450 Hz, 4th-order Butterworth (`BANDPASS_HZ`, `FILTER_ORDER`; upper edge ≤ `NYQUIST_CAP` × FS),
-then a 60 Hz notch with Q = 30 (`NOTCH_HZ`, `NOTCH_Q`) as a safety net behind the analog notch. Document in PROTOCOL.md.
+All filtering is **analog** (front end): band-pass 20–447 Hz + 60 Hz notch (Mexico mains). **No digital filter**
+(Ben, 2026-11-19); `processing.Filter` is a pass-through that only keeps one interface for live and offline code.
+Software removes the ESP32 offset (rest ≈ 2048 of 0..4095) by subtracting each window's mean in `features`
+(not for an envelope sensor, `RAW_SIGNAL = False`). Document the analog filters in PROTOCOL.md (P1).
 
 ## File formats
 - `signal.csv`: `t_s,value,label` – one row per reading (24 000 rows).

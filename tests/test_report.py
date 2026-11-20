@@ -22,7 +22,7 @@ def good_df(n: int = SAMPLE_N) -> pd.DataFrame:
     """A clean fake signal: mid-scale noise, never at the ADC limit, no gaps."""
     rng = np.random.default_rng(0)
     idx = np.arange(n)
-    values = 512 + rng.integers(-20, 20, n)
+    values = config.ADC_MID + rng.integers(-20, 20, n)
     return pd.DataFrame({"t_s": idx / config.FS, "value": values, "label": label_at(idx)})
 
 
@@ -76,8 +76,8 @@ def write_sample(root, values) -> None:
 
 
 def test_tables_one_row_per_sample(tmp_path):
-    write_sample(tmp_path, np.full(SAMPLE_N, 512))
-    write_sample(tmp_path, np.full(SAMPLE_N, 1023))          # clipped -> rejected
+    write_sample(tmp_path, np.full(SAMPLE_N, config.ADC_MID))
+    write_sample(tmp_path, np.full(SAMPLE_N, 2 ** config.ADC_BITS - 1))   # clipped -> rejected
     meta = metadata_table(tmp_path)
     assert list(meta.sample_id) == ["sample_001", "sample_002"]
     assert meta.file_name.iloc[0].endswith("sample_001/signal.csv")

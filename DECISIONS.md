@@ -12,6 +12,8 @@ The test sessions are listed in `TEST_PLACEMENTS` in `semgia/config.py` and are 
 What we chose: four numbers per 200 ms window (new window every 100 ms): RMS, mean absolute value (MAV),
 waveform length (WL) and zero crossings (ZC). Each one is divided by the rest level, so 1.0 means "like rest".
 Right now the rest level is the first rest phase of the same sample. The plan is one calibration per placement. Windows closer than 1.5 s to a cue change are not used for training (TRIM_S).
+Filtering is analog (20-447 Hz band-pass and 60 Hz notch), so in software we only subtract the mean
+of each window to remove the ESP32 offset of about 2048.
 
 Why (reason): RMS, MAV and WL measure the size of the signal, and in a contraction they go up several
 times. ZC is a rough frequency measure, and the frequency drops with fatigue, so it should help with the

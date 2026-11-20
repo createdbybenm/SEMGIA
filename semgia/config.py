@@ -5,12 +5,9 @@ from pathlib import Path
 # --- Signal ---
 FS = 1000                 # sampling rate in Hz (must match firmware)
 RAW_SIGNAL = True         # False if the sensor outputs an envelope (e.g. MyoWare ENV pin)
-BANDPASS_HZ = (20, 450)   # only used when RAW_SIGNAL is True
-FILTER_ORDER = 4          # Butterworth band-pass order
-NYQUIST_CAP = 0.45        # upper band edge at most 0.45 * FS: must stay below FS / 2 (FS = 500 Hz -> 225 Hz)
-NOTCH_HZ = 60             # mains frequency (Mexico); the analog front end also has a 60 Hz notch,
-                          # this one is a safety net
-NOTCH_Q = 30              # notch quality factor: width = NOTCH_HZ / NOTCH_Q = 2 Hz
+ADC_MID = 2048            # ESP32 mid-scale: where a raw signal sits at rest (only used by MockSource)
+# Filtering is analog (20-447 Hz band-pass + 60 Hz notch), no digital filter (Ben 2026-11-19).
+# Software only subtracts each window's mean in processing.features (ESP32 offset ~2048).
 
 # --- Windowing ---
 WINDOW_S = 0.200          # 200 ms windows
@@ -36,7 +33,7 @@ ELECTRODE_DISTANCE_CM = "TODO-P1"   # centre-to-centre distance of the two elect
 SKIN_PREPARATION = "TODO-P1"        # e.g. "alcohol wipe"
 SENSOR_MODEL = "TODO-P1"            # e.g. "MyoWare 2.0"
 GAIN = "TODO-P1"                    # analog gain of the sensor board
-ADC_BITS = 10                       # Arduino Uno: 10-bit ADC (0..1023) - check with P1
+ADC_BITS = 12                       # ESP32: 12-bit ADC (0..4095)
 
 # --- Quality check (QUALITY-REPORT.md) ---
 GAP_TOLERANCE_S = 1.5 / FS          # t_s step should be 1/FS; a step > 1.5 samples = a missing row
