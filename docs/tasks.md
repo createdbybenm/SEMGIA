@@ -1,7 +1,7 @@
 # Who does what (until 2026-11-24)
 
 Four roles. Each person owns **their folders**, so nobody edits the same file at the same time.
-Every task = a GitHub issue → a branch `yourname/task` → a PR → 1 review by anyone → squash merge.
+Every task = a GitHub issue → a branch `yourname/task` → a PR → CI green + no conflicts → squash merge (`/gitup merge`).
 Start every Claude session with: *"Read MEMORY.md and the CLAUDE.md of <your folder>, then do <task>."*
 
 ---

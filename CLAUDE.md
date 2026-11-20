@@ -51,7 +51,8 @@ Details: @docs/architecture.md
 - Scripts in `scripts/` are thin CLIs (argparse) around `semgia/`.
 
 ## Git
-- Never commit to `main`. Branch = `name/short-task` (e.g. `ben/serial-reader`). Small PR, 1 review, squash merge.
+- Never commit to `main`. Branch = `name/short-task` (e.g. `ben/serial-reader`). Small PR → squash merge by `/gitup merge`
+  once CI is green and there are no conflicts. No teammate approval needed.
 - Only commit code you actually ran. See docs/git_workflow.md.
 
 ## Team skills (`.claude/skills/`, shared via Git)

@@ -18,6 +18,8 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - 2026-11-19 BM – Microcontroller = **ESP32**, 12-bit ADC (0..4095), `ADC_BITS = 12`.
 - 2026-11-19 BM – Dashboard stays in the cloud (Azure). Colab = course documentation / project notebook (split still open).
 - 2026-11-19 BM – Team skills in `.claude/skills/`: /gitup, /calib, /docit, /audit. Edit them via PR like code.
+- 2026-11-19 BM – **No teammate approval for PRs.** Merge = `/gitup merge`: the AI squash-merges when CI is green,
+  there are no conflicts and no foreign files/secrets; otherwise it stops and asks.
 - 2026-11-19 BM – Git: own short-lived branch per task (`name/task`), PR to main within 1–2 days. Shared AI context
   = files on `main` (CLAUDE.md, MEMORY.md, docs/course/), so merge doc PRs first.
 - 2026-11-18 – **Recording happens in our existing web interface** (Windows 11). It gets adapted for this protocol:

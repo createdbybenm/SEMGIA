@@ -5,7 +5,8 @@
 3. Build it (vibecoding is fine), **run it yourself**, add a test.
 4. `pytest -q && ruff check .`
 5. Commit, push, open a PR (`Closes #<issue>`). Fill in the checklist.
-6. One teammate reviews → squash merge → the issue moves to *Done*.
+6. CI green + no conflicts → squash merge (`/gitup merge` does the checks) → the issue moves to *Done*.
+   No teammate approval needed.
 
 Rules:
 - Never push to `main`. Keep branches ≤ 1–2 days.
