@@ -54,6 +54,11 @@ Details: @docs/architecture.md
 - Never commit to `main`. Branch = `name/short-task` (e.g. `ben/serial-reader`). Small PR, 1 review, squash merge.
 - Only commit code you actually ran. See docs/git_workflow.md.
 
+## Team skills (`.claude/skills/`, shared via Git)
+`/gitup start <task>` · `/gitup end` (branch, checks, commit, PR) · `/calib` (does this work fit my task + the assignment?)
+· `/docit <file>` (clear, short, exact docs) · `/audit` (update MEMORY.md + docs after a session). Typical task:
+`/gitup start` → work → `/calib` → `/audit` → `/gitup end`.
+
 ## Shared memory
 @MEMORY.md is the team's shared memory. **When a decision is made, a gotcha is found or the status changes,
 add one dated line there in the same PR.** Keep it short and delete outdated lines.

@@ -16,6 +16,7 @@ Rules:
 Command cheat sheet: [docs/git_workflow.md](docs/git_workflow.md). Tasks per week: [docs/tasks.md](docs/tasks.md).
 
 ## Using Claude Code (or other AI assistants)
+- Team skills in `.claude/skills/`: `/gitup start <task>` → work → `/calib` → `/audit` → `/gitup end`. `/docit <file>` for docs.
 - `CLAUDE.md` (root + every folder) and `MEMORY.md` are loaded automatically, so all of us share the same context.
 - Start a task with: *"Read MEMORY.md and the CLAUDE.md of the folder, then do issue #12."*
 - End a task with: *"Update MEMORY.md with what changed."*

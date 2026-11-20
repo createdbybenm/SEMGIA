@@ -10,6 +10,7 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
   `data/metadata.csv` (the PDF; the slides said "test only in Azure", PDF wins). Choose on train only, test once at the end.
 - 2026-11-19 BM – The analog front end has a **60 Hz notch** (Mexico). Software `NOTCH_HZ = 50` is wrong → fix (P2).
 - 2026-11-19 BM – Dashboard stays in the cloud (Azure). Colab = course documentation / project notebook (split still open).
+- 2026-11-19 BM – Team skills in `.claude/skills/`: /gitup, /calib, /docit, /audit. Edit them via PR like code.
 - 2026-11-19 BM – Git: own short-lived branch per task (`name/task`), PR to main within 1–2 days. Shared AI context
   = files on `main` (CLAUDE.md, MEMORY.md, docs/course/), so merge doc PRs first.
 - 2026-11-18 – **Recording happens in our existing web interface** (Windows 11). It gets adapted for this protocol:
