@@ -6,6 +6,17 @@ Start every Claude session with: *"Read MEMORY.md and the CLAUDE.md of <your fol
 
 ---
 
+## Report 1: due Sat 2026-11-21 23:59 (checklist: `docs/course/requirements.md`)
+Each item goes on its own branch + PR. Don't copy the professor's example (it gets returned).
+
+| Who | Task |
+|---|---|
+| **Everyone** | `rationale/Mxx.md` (~100 words, own words, 1 source) · `ai-tools/Mxx.png` (screenshot of your AI tool on this repo + 1 question) · your "I read the method and I agree" line in PROTOCOL.md · ≥ 1 commit from **your own** account · fill your row of the team table |
+| P1 Hardware | record sessions (mark some as test, e.g. the last 2) · 1 electrode photo per session → `figures/` · cue video → `cue/` · root `PROTOCOL.md` from `docs/protocol.md` + filter table (analog 60 Hz notch: type, order, limits, source) |
+| P2 AI (Ben) | `NOTCH_HZ` 50 → 60 (or drop, given the analog notch) · `scripts/export_metadata.py` → `data/metadata.csv` (14 required columns, `set`) · `scripts/check_quality.py` → `QUALITY-REPORT.md` (clipping, missing, length ±2 %) · fair split in `evaluate.py` (choose on train, test once; floors + confusion matrix) · `DECISIONS.md` parts 7 + 8 |
+| P3 Azure | `DECISIONS.md` part 9 (route: model on laptop, record to Azure) + screenshot of one saved record with metadata · privacy/consent wording (LFPDPPP, GitHub storage) |
+| P4 Interface | root `README.md`: six parts with numbers + "Evidence:" lines + team table (member code, GitHub user, role, AI tool) · add the professor as collaborator · tag `v0-first` now, `v1-report` at the end |
+
 ## Person 1 – Hardware & recordings
 **Owns:** `firmware/`, `semgia/sources.py`, `docs/protocol.md`, `data/raw/`
 
@@ -68,5 +79,5 @@ Start every Claude session with: *"Read MEMORY.md and the CLAUDE.md of <your fol
 |---|---|
 | this week | sensor → signal on the PC · web interface writes the sample folders · Azure set up · per-placement calibration in code |
 | next days | all 10 placements recorded · evaluate.py results (calibrated vs. raw) · dashboard on Azure |
-| 2026-11-21 | **feature freeze** – only bug fixes, report, rehearsal |
-| 2026-11-24 | delivery: demo (live sensor or file fallback) + report + tag `v1.0` |
+| **2026-11-21 23:59** | **Report 1 handed in** (tag `v1-report`), then feature freeze: only bug fixes, notebook, rehearsal |
+| 2026-11-24 | final class: 4 new placements → Azure, ≥ 75 %, live demo (or file fallback), Colab notebook, exam, tag `v1.0` |

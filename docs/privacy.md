@@ -1,7 +1,8 @@
 # Privacy
 
-The data is **pseudonymized**, not anonymous. Under GDPR it is still personal (health) data,
-so we keep the amount minimal and get consent.
+The data is **pseudonymized**, not anonymous. It is still personal **health** data: "sensitive personal data" under
+Mexico's LFPDPPP (the course's reference) and health data under GDPR. So we keep the amount minimal and get consent.
+The course also asks: research prototype or medical product? (COFEPRIS). Ours is a research prototype, not a medical device.
 
 ## Rules
 | What | Where | Allowed |
@@ -9,7 +10,8 @@ so we keep the amount minimal and get consent.
 | Name ↔ pseudonym list (`P001` = …) | **paper only**, kept by one person | never digital, never in Git/Azure |
 | Subject ID `P001`, operator ID `OP01` | Git, Azure | yes |
 | Age bracket (e.g. 20–29), sex, dominant side | consent form / report | only if needed |
-| Names, birth date, photos of the person, e-mail | — | **never** |
+| Photos of the **electrodes** (one per session, course requirement) | `figures/` in Git | yes, if no face / tattoo / anything identifying |
+| Names, birth date, photos of the person or face, e-mail | — | **never** |
 | Raw sEMG + metadata | `data/raw` (private GitHub repo), Azure Storage (EU region) | yes, with consent |
 
 - `make_metadata()` rejects subject/operator IDs that don't match `P###` / `OP##`.
