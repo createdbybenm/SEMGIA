@@ -8,6 +8,7 @@ from pathlib import Path
 
 import joblib
 import numpy as np
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
@@ -41,14 +42,31 @@ class ThresholdModel:
         return np.array([self.predict(f) for f in X])
 
 
+# The options we compare (docs/report/model_research.md, section 2). train.py and evaluation.py use this list.
+ML_KINDS = ["logreg", "lda", "forest"]
+
+
 class MLModel:
-    """Model B: logistic regression (default) or random forest on all normalized features."""
+    """Model B: logistic regression (default), LDA or random forest on all normalized features.
+
+    Class imbalance (rest 2/3, contraction 1/3) is handled with class weights, no resampling
+    (resampling miscalibrates logistic regression: van den Goorbergh 2022, see model_research.md 3b).
+    """
 
     def __init__(self, kind: str = "logreg"):
         self.kind = kind
         if kind == "logreg":
+            # default: linear, one weight per feature (explainable); linear models drifted least
+            # across days in Kaufmann 2010 (model_research.md 2)
             clf = LogisticRegression(class_weight="balanced")
+        elif kind == "lda":
+            # cross-check: most robust model without retraining in Kaufmann 2010, generalised better than
+            # an MLP under electrode shift in Young 2011. LDA has no class_weight; equal priors are its
+            # equivalent of "balanced" (the decision ignores that rest windows are twice as frequent).
+            clf = LinearDiscriminantAnalysis(priors=[0.5, 0.5])
         elif kind == "forest":
+            # non-linear comparison only: shows whether non-linearity helps; flexible models lost most
+            # on unseen sessions in Kaufmann 2010 (model_research.md 2)
             clf = RandomForestClassifier(n_estimators=100, max_depth=6, class_weight="balanced",
                                          random_state=0)
         else:

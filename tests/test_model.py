@@ -3,7 +3,7 @@ from pathlib import Path
 
 import numpy as np
 
-from semgia.model import MLModel, Smoother, ThresholdModel
+from semgia.model import ML_KINDS, MLModel, Smoother, ThresholdModel
 from semgia.processing import sample_dataset
 from semgia.storage import load_sample
 
@@ -32,9 +32,12 @@ def test_models_work_on_new_placement(tmp_path):
     X_test = np.vstack([d[0] for d in data[4:]])
     y_test = np.concatenate([d[1] for d in data[4:]])
 
-    for kind in ("logreg", "forest"):
+    # LDA (equal covariance for rest + contraction) misses part of the fatigued test sample on this
+    # mock data (~0.95 here vs 1.0 for logreg/forest). Known weakness, compared in evaluate.py -> lower bar.
+    min_acc = {"lda": 0.9}
+    for kind in ML_KINDS:   # logreg, lda, forest
         model = MLModel(kind).fit(X_train, y_train)
-        assert (model.predict_many(X_test) == y_test).mean() > 0.95
+        assert (model.predict_many(X_test) == y_test).mean() > min_acc.get(kind, 0.95)
     assert (ThresholdModel().predict_many(X_test) == y_test).mean() > 0.95
 
     model.save(tmp_path / "m.joblib")

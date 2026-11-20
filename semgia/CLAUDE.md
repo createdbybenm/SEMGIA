@@ -4,8 +4,10 @@
 |---|---|---|
 | `config.py` | ALL constants (FS, windows, SAMPLE_STEPS, TRIM_S, thresholds, dropdown choices, Azure names, paths) | everyone |
 | `sources.py` | `MockSource`, `FileSource`, `SerialSource` | Hardware |
-| `processing.py` | `Filter`, `Windower`, `features`, `clean_mask`, `Calibration`, `sample_dataset` | AI |
-| `model.py` | `ThresholdModel`, `MLModel("logreg"/"forest")`, `Smoother` | AI |
+| `processing.py` | `Filter`, `Windower`, `features`, `clean_mask`, `Calibration`, `sample_calibration`, `sample_dataset` | AI |
+| `model.py` | `ThresholdModel`, `MLModel("logreg"/"lda"/"forest")`, `ML_KINDS` (compared kinds), `Smoother` | AI |
+| `evaluation.py` | fair split (`split_train_test`), `lopo_predictions`, `final_predictions`, scores, confusion, Markdown | AI |
+| `report.py` | `data/metadata.csv` rows (`metadata_table`), quality rule (`check_signal`) for `QUALITY-REPORT.md` | AI |
 | `recorder.py` | `label_at`, `LivePredictor`, `SampleRecorder` (live logic of the app, no GUI) | App |
 | `storage.py` | `make_metadata`, `next_sample_id`, `LocalWriter`, `AzureUploader`, `load_sample`, `upload_sample` | Azure |
 
@@ -29,6 +31,7 @@ signal.csv columns: t_s,value,label
 Agreed (MEMORY.md 2026-11-18): calibration = rest + max contraction, recorded ONCE per placement in the web interface.
 `sample_dataset` should then take that placement's calibration instead of the sample's own first rest phase,
 and `evaluate.py` should also report results without calibration. Wait for the web interface's file format.
+`sample_calibration` is the one place to change (used by `sample_dataset` and `scripts/first_look.py`).
 
 ## Rules
 - `processing.py` is used live AND offline. Keep the filter causal with state (`sosfilt` + `zi`),
@@ -38,5 +41,5 @@ and `evaluate.py` should also report results without calibration. Wait for the w
 - `storage.AzureUploader` must catch every exception and only log. A broken Wi-Fi must never stop a recording.
 - `make_metadata` is the privacy gate. Don't bypass it, and don't add free-text fields that invite names.
 - Azure SDK imports stay inside functions, so the package works without Azure.
-- New features/models: add them next to the existing ones, compare with `scripts/evaluate.py`,
+- New features/models: add them next to the existing ones (new model kind → `ML_KINDS`), compare with `scripts/evaluate.py`,
   and only switch the default if leave-one-placement-out gets better. Write the result into MEMORY.md.

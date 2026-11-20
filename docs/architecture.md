@@ -52,24 +52,32 @@ baseline  [1.5–6.5]                                 ← rest level of this sam
 ## Models (why logistic regression?)
 2 classes, 4 numbers per window, ~100 samples → a simple model generalizes best to new electrode placements,
 is explainable (weights per feature) and trains in < 1 s. Neural networks need far more data.
-It is not fixed: evaluate.py compares all three below and real data decides.
+It is not fixed: evaluate.py compares the models below and real data decides (sources: `docs/report/model_research.md`).
 
 - **A – ThresholdModel:** RMS > 3× rest → contraction, < 2× rest → rest. No training needed. Fallback.
 - **B – MLModel("logreg"):** log → StandardScaler → LogisticRegression on the 4 features (`models/model.joblib`).
-- **MLModel("forest"):** random forest, same input. Comparison only.
-- `scripts/evaluate.py`: leave-one-placement-out, balanced accuracy, on clean windows and on all windows.
-- **Course rule (fair split, target):** sessions are fixed as `set = train | test`. Leave-one-placement-out runs on the
-  **train** sessions only, to choose features + model. The test sessions are scored **once** at the end, as accuracy
-  next to the chance floor and the threshold floor, plus a confusion matrix. Not implemented yet.
+- **MLModel("lda"):** linear discriminant analysis, same input, equal priors. Linear cross-check of logreg.
+- **MLModel("forest"):** random forest, same input. Non-linear comparison only.
+- Class imbalance (rest 16 s : contraction 8 s): class weights (`class_weight="balanced"`, LDA `priors=[0.5, 0.5]`),
+  no resampling. The list of compared kinds is `ML_KINDS` in `semgia/model.py`.
+- **Fair split (course rule, implemented):** the test placements are `TEST_PLACEMENTS` in `config.py` (only place;
+  `set` column in `data/metadata.csv`). `evaluate.py` (default) runs leave-one-placement-out on the **train**
+  placements only, to choose features + model. `evaluate.py --final` trains on all train placements and scores the
+  test placements **once**. `train.py` never uses test placements.
+- Scores per model: accuracy + balanced accuracy on clean, all and smoothed windows (smoothed = all windows through
+  `Smoother`, like the app), next to the chance floor (majority class share) and the threshold floor; split by
+  `condition` (fresh/fatigued) and placement; confusion matrix on all windows. `--out file.md` writes the tables.
+- Rejected samples (`QUALITY-REPORT.md`, `scripts/check_quality.py`) are skipped by train + evaluate.
 
 ## Filters
-The analog front end has a **60 Hz notch** (Mexico mains). Software: band-pass 20–450 Hz + `NOTCH_HZ` in config
-(still 50 Hz, must become 60 Hz or be dropped → decide and document in PROTOCOL.md).
+The analog front end has a **60 Hz notch** (Mexico mains). Software (`processing.Filter`, causal):
+band-pass 20–450 Hz, 4th-order Butterworth (`BANDPASS_HZ`, `FILTER_ORDER`; upper edge ≤ `NYQUIST_CAP` × FS),
+then a 60 Hz notch with Q = 30 (`NOTCH_HZ`, `NOTCH_Q`) as a safety net behind the analog notch. Document in PROTOCOL.md.
 
 ## File formats
 - `signal.csv`: `t_s,value,label` – one row per reading (24 000 rows).
 - `predictions.csv`: `t_s,prediction` – one row per 100 ms (as soon as a baseline exists).
 - `metadata.json`: `sample_id, placement_id, subject_id, operator_id, muscle, side, sensor_id, electrode_type,
   placement_notes, effort, condition, sampling_rate_hz, start_time_utc, notes`.
-- `data/metadata.csv` (course requirement, to be generated from the JSON files): one row per recording, see
-  `docs/course/requirements.md`.
+- `data/metadata.csv` (course requirement, written by `scripts/export_metadata.py` from the JSON files + per-session
+  constants in `config.py`): one row per recording, see `docs/course/requirements.md`.

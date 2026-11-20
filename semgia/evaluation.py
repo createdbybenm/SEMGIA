@@ -11,12 +11,13 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, confusion_matrix
 
 from semgia import config
-from semgia.model import MLModel, ThresholdModel
+from semgia.model import ML_KINDS, MLModel, Smoother, ThresholdModel
 from semgia.report import split_of
 
 FLOOR = "threshold (floor)"     # ThresholdModel: one threshold on one feature = the floor to beat
-ML_KINDS = ["logreg", "forest"]  # MLModel kinds to compare. A new kind in model.py -> add its name here.
+# ML_KINDS (the MLModel kinds we compare) lives in semgia/model.py.
 WINDOW_SETS = {"clean": "", "all": "_all"}   # "clean" = middle of each phase, "all" = every window (live)
+SMOOTHED = "smoothed"   # extra set: all windows of a sample through Smoother (= what the app shows)
 
 
 def split_train_test(samples: list[dict]) -> tuple[list[dict], list[dict]]:
@@ -33,15 +34,25 @@ def build_models(train: list[dict]) -> dict:
     return {FLOOR: ThresholdModel(), **{k: MLModel(k).fit(X, y) for k in ML_KINDS}}
 
 
+def smooth(pred: np.ndarray) -> np.ndarray:
+    """Majority vote over the prediction stream of ONE sample, with a fresh Smoother (like live)."""
+    smoother = Smoother()
+    return np.array([smoother(int(p)) for p in pred])
+
+
 def predict(models: dict, test: list[dict]) -> list[dict]:
-    """One record per (model, sample, window set): true labels y and predictions."""
+    """One record per (model, sample, window set): true labels y and predictions.
+    Window sets: clean, all, smoothed (= all windows after majority-vote smoothing)."""
     out = []
     for name, model in models.items():
         for s in test:
-            for windows, key in WINDOW_SETS.items():
-                out.append({"model": name, "sample": s["id"], "placement": s["placement"],
-                            "condition": s.get("condition", ""), "windows": windows,
-                            "y": s["y" + key], "pred": model.predict_many(s["X" + key])})
+            info = {"model": name, "sample": s["id"], "placement": s["placement"],
+                    "condition": s.get("condition", "")}
+            preds = {w: model.predict_many(s["X" + key]) for w, key in WINDOW_SETS.items()}
+            preds[SMOOTHED] = smooth(preds["all"])
+            for windows, pred in preds.items():
+                y = s["y"] if windows == "clean" else s["y_all"]
+                out.append({**info, "windows": windows, "y": y, "pred": pred})
     return out
 
 

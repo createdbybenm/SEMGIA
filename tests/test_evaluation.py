@@ -9,6 +9,7 @@ from semgia import config
 from semgia.evaluation import (
     FLOOR,
     ML_KINDS,
+    SMOOTHED,
     confusion_markdown,
     confusions,
     final_predictions,
@@ -16,6 +17,7 @@ from semgia.evaluation import (
     markdown_table,
     score_table,
     scores,
+    smooth,
     split_train_test,
 )
 from semgia.processing import sample_calibration, window_features
@@ -52,7 +54,7 @@ def test_lopo_uses_train_only(samples, monkeypatch):
     assert {p["placement"] for p in preds} == {"E01", "E02"}
     table = score_table(preds)
     assert set(table.model) == {FLOOR, *ML_KINDS}
-    assert set(table.windows) == {"clean", "all"}
+    assert set(table.windows) == {"clean", "all", SMOOTHED}
     assert (table.balanced_accuracy > 0.9).all()
 
 
@@ -93,6 +95,17 @@ def test_confusion_rows_are_true_labels(samples, monkeypatch):
     n_true_contract = sum(int((p["y"] == config.CONTRACT).sum()) for p in floor_all)
     assert cm.shape == (2, 2) and cm[1].sum() == n_true_contract
     assert "pred contract" in confusion_markdown(confusions(preds))
+
+
+def test_smooth_removes_single_flicker():
+    pred = np.array([0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1])
+    out = smooth(pred)
+    assert out[3] == 0                       # one stray "contract" is voted away
+    assert out[-1] == 1 and len(out) == len(pred)
+
+
+def test_lda_is_in_the_comparison():
+    assert "lda" in ML_KINDS
 
 
 def test_markdown_table_rounds_floats():

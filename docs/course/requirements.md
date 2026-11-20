@@ -20,9 +20,9 @@ Status as of 2026-11-19. The files must sit at the **repo root**, with exactly t
 | 1 | `README.md`: six parts (see below) + team table: member code, GitHub user, role, AI tool | README is a dev quickstart → **rewrite** (keep dev part lower down) | P4 |
 | 2 | `PROTOCOL.md`: method, **type, order and limits of every filter + source** (analog 60 Hz notch AND software filters), 1 line per member "I read the method and I agree" (own commit each) | `docs/protocol.md` exists → move to root and extend | P1 |
 | 3 | `data/raw/`: **every** recording, untouched (train **and** test sessions) | `data/raw/sample_NNN/` folders, no data yet | P1 |
-| 4 | `data/metadata.csv`: one row per recording, columns below | missing → `scripts/export_metadata.py` (task) | P2 |
-| 5 | `QUALITY-REPORT.md`: one row per recording + reason for each rejection | missing → `scripts/check_quality.py` (task) | P2 |
-| 6 | `DECISIONS.md`: parts 7 Features, 8 Model, 9 Route (chose / reason in own words / not understood yet) | content exists in docs/architecture.md, file missing | P2 (7, 8), P3 (9) |
+| 4 | `data/metadata.csv`: one row per recording, columns below | `scripts/export_metadata.py` done (per-session constants TODO-P1 in config.py); run on real data | P2 |
+| 5 | `QUALITY-REPORT.md`: one row per recording + reason for each rejection | `scripts/check_quality.py` done (rule fixed, written before any score); run on real data | P2 |
+| 6 | `DECISIONS.md`: parts 7 Features, 8 Model, 9 Route (chose / reason in own words / not understood yet) | draft at root: 7 + 8 done (Ben rewrites reasons in own words), 9 open | P2 (7, 8), P3 (9) |
 | 7 | `rationale/Mxx.md`: ~100 words, own words, one group choice you support or doubt + why + 1 source | missing | **each member** |
 | 8 | `ai-tools/Mxx.png`: screenshot of your AI tool open on this project with one question | missing | **each member** |
 | 9 | cue video (e.g. `cue/cue-video.mp4`, screen recording of our REST/CONTRACT cues) | missing | P1 / P4 |

@@ -1,7 +1,7 @@
 """Train Model B on the clean windows of all TRAIN samples (not TEST_PLACEMENTS) -> models/model.joblib.
 
     python scripts/train.py                       # real data in data/raw
-    python scripts/train.py --data data/synthetic --kind forest
+    python scripts/train.py --data data/synthetic --kind lda   # or forest
 """
 
 import argparse
@@ -13,7 +13,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from semgia import config  # noqa: E402
 from semgia.evaluation import split_train_test  # noqa: E402
-from semgia.model import MLModel  # noqa: E402
+from semgia.model import ML_KINDS, MLModel  # noqa: E402
 from semgia.processing import sample_dataset  # noqa: E402
 from semgia.report import check_signal  # noqa: E402
 from semgia.storage import list_samples, load_sample  # noqa: E402
@@ -43,7 +43,7 @@ def load_all(data: Path) -> list[dict]:
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--data", default=str(config.DATA_RAW))
-    p.add_argument("--kind", choices=["logreg", "forest"], default="logreg")
+    p.add_argument("--kind", choices=ML_KINDS, default="logreg")
     p.add_argument("--out", default=str(config.MODELS / "model.joblib"))
     a = p.parse_args()
     samples, test = split_train_test(load_all(Path(a.data)))   # test placements never go into the model

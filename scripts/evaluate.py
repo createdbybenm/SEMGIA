@@ -1,10 +1,13 @@
-"""Fair-split evaluation: floor (threshold) vs. ML models, accuracy + balanced accuracy, fresh vs. fatigued.
+"""Fair-split evaluation: floor (threshold) vs. ML models (logreg, lda, forest).
+
+Scores: accuracy + balanced accuracy, overall, fresh vs. fatigued, per placement, confusion matrices.
 
 Sessions (= placements) are fixed as train or test in config.TEST_PLACEMENTS.
   default:  leave-one-placement-out on the TRAIN placements only -> use this to choose features + model.
             Each held-out placement = "electrodes were re-applied". Test samples are never touched.
   --final:  train on all train samples, score the test placements ONCE. Do not tune anything afterwards.
-Windows:  clean = middle of each phase (what we train on), all = every window incl. transitions (live).
+Windows:  clean = middle of each phase (what we train on), all = every window incl. transitions,
+          smoothed = all windows after majority-vote smoothing (Smoother, = what the live app shows).
 Floors:   chance = share of the majority class; threshold (floor) = one threshold on RMS (ThresholdModel).
 
     python scripts/evaluate.py --data data/synthetic

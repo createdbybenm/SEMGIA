@@ -24,8 +24,9 @@ class Filter:
     def __init__(self, fs: int = config.FS, raw: bool = config.RAW_SIGNAL):
         self.raw = raw
         if raw:
-            high = min(config.BANDPASS_HZ[1], 0.45 * fs)
-            bp = signal.butter(4, [config.BANDPASS_HZ[0], high], btype="bandpass", fs=fs, output="sos")
+            high = min(config.BANDPASS_HZ[1], config.NYQUIST_CAP * fs)
+            bp = signal.butter(config.FILTER_ORDER, [config.BANDPASS_HZ[0], high], btype="bandpass",
+                               fs=fs, output="sos")
             b, a = signal.iirnotch(config.NOTCH_HZ, config.NOTCH_Q, fs=fs)
             self.sos = np.vstack([bp, signal.tf2sos(b, a)])
         self.zi = None

@@ -6,6 +6,8 @@ from pathlib import Path
 FS = 1000                 # sampling rate in Hz (must match firmware)
 RAW_SIGNAL = True         # False if the sensor outputs an envelope (e.g. MyoWare ENV pin)
 BANDPASS_HZ = (20, 450)   # only used when RAW_SIGNAL is True
+FILTER_ORDER = 4          # Butterworth band-pass order
+NYQUIST_CAP = 0.45        # upper band edge at most 0.45 * FS: must stay below FS / 2 (FS = 500 Hz -> 225 Hz)
 NOTCH_HZ = 60             # mains frequency (Mexico); the analog front end also has a 60 Hz notch,
                           # this one is a safety net
 NOTCH_Q = 30              # notch quality factor: width = NOTCH_HZ / NOTCH_Q = 2 Hz
