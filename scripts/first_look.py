@@ -5,7 +5,7 @@ Questions it answers:
     "clean" windows really in steady rest / steady contraction?
   - THRESHOLD_ON / OFF (3x / 2x rest): does RMS/rest cross them in the contraction
     and stay below them in rest?
-Top:    raw ADC value (no digital filter; ESP32 rest ~2048), contraction (timer label) shaded orange,
+Top:    raw ADC value minus its mean (no digital filter), contraction (timer label) shaded orange,
         clean windows as a green bar at the bottom.
 Bottom: RMS / rest baseline per window (log scale) with the ON/OFF threshold lines.
 Uses the same processing as training (window_features, clean_mask, sample_calibration).
@@ -46,7 +46,9 @@ def plot_sample(sample_dir: Path, out_dir: Path) -> Path:
     clean = clean_mask(ends, changes, len(labels))
 
     fig, (top, bottom) = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
-    top.plot(t, values, lw=0.4, color="black")
+    # the ESP32 signal sits at ~2048; minus the mean it is centred on 0, so the bursts are readable
+    # (same idea as the per-window mean subtraction in processing.features)
+    top.plot(t, values - values.mean(), lw=0.4, color="black")
     for a, b in runs(labels == config.CONTRACT):
         top.axvspan(t[a], t[b], color="orange", alpha=0.25, label="contract (timer)")
     for a, b in runs(clean):   # clean window a..b covers [ends[a] - WINDOW, ends[b]]
@@ -55,7 +57,7 @@ def plot_sample(sample_dir: Path, out_dir: Path) -> Path:
     handles, names = top.get_legend_handles_labels()
     unique = dict(zip(names, handles))   # one legend entry per name, not one per span
     top.legend(unique.values(), unique.keys(), loc="upper right")
-    top.set_ylabel("ADC value")
+    top.set_ylabel("ADC value - mean")
     top.set_title(f"{meta['sample_id']}  {meta.get('placement_id', '')}  "
                   f"{meta.get('effort', '')}  {meta.get('condition', '')}")
 

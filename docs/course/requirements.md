@@ -59,8 +59,8 @@ unchanged unless the team agrees otherwise.
   → handle it in training (class weights / balanced windows) and say so in DECISIONS.md. Open.
 - **Cleaning rule written before any score:** reject a recording/trial if a sample sits at the ADC limit (0 or
   2^bits − 1), if samples are missing, or if its length is off by > 2 % from 24 000 (course check, slides 15).
-- **Filters:** the analog front end already has a **60 Hz notch** (Mexico mains). The software notch in `config.py`
-  (`NOTCH_HZ = 50`) is wrong for this setup → set 60 Hz or drop it, and write the choice + source in PROTOCOL.md.
+- **Filters:** no digital filter (analog band-pass 20-447 Hz + 60 Hz notch); software only removes the offset per
+  window - done. Write the analog filters + source in PROTOCOL.md.
   Band-pass upper limit must be < Fs/2 (course band 20–450 Hz, source: course / McManus 2020).
 - **Report the score next to its floors:** chance (≈ 50 % with balanced classes) and a single threshold on one feature
   (our `ThresholdModel`), plus a confusion matrix. Course metric = accuracy; we also give balanced accuracy.
