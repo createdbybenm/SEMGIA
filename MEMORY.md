@@ -40,7 +40,7 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - 2026-11-03 – Python only, one package `semgia/`, thin scripts. No IoT Hub / Functions / Cosmos DB.
 - 2026-11-03 – Azure = 1 Storage Account (Blob `signals`, Tables `samples` + `predictions`) + 1 App Service (Streamlit).
 - 2026-11-03 – Uploads go directly to Storage every 2 s in a background thread. Local CSV is the source of truth.
-- 2026-11-03 – FS = 1000 Hz, 200 ms windows, 100 ms step, bandpass 20–450 Hz.
+- 2026-11-03 – FS = 1000 Hz, 200 ms windows, 100 ms step.
 - 2026-11-03 – Pseudonyms P001 / OP01. Name list only on paper. EU Azure region. Repo stays private (also: course material in docs/course is students-only).
 
 ## Current status (2026-11-19)
@@ -61,7 +61,8 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - 2026-11-18 – Record all samples on ONE machine (or `git pull` first): sample numbers are counted from the local
   `data/raw` folder, so two machines would both create e.g. `sample_012`.
 - 2026-11-18 – Aborting during a sample leaves a partial folder (< 24 000 rows) → delete it by hand.
-- 2026-11-03 – If the sensor only gives an envelope (e.g. MyoWare ENV pin), set `RAW_SIGNAL = False` in config.py.
+- 2026-11-19 BM – If the sensor only gives an envelope (e.g. MyoWare ENV pin), set `RAW_SIGNAL = False` in config.py:
+  otherwise `features()` subtracts each window's mean and erases a steady contraction.
 - 2026-11-03 – Streamlit on App Service needs WebSockets enabled and `--server.address 0.0.0.0 --server.port 8000`.
 - 2026-11-03 – `LocalWriter` refuses to overwrite an existing sample folder (on purpose).
 
@@ -69,14 +70,14 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - Colab project notebook: one for the group, or one per member + one group? (ask the professor)
 - Warning cue before the contraction (`warning_s`)? Currently 0 s.
 - Professor's GitHub user, to add as collaborator. Member codes M01–M04: who is who?
-- Web interface: where is the repo, what does it save today (format of calibration + recordings), how are markers set?
+- Recording dashboard (ESP32, teammate): file format of the calibration + sample CSVs it will write?
 - Raw output or envelope from the sensor? → decides RAW_SIGNAL.
 - FS = 1000 Hz on the ESP32? Confirm in the firmware (P1).
 - Which muscle? (default: biceps brachii right)
 - The consent form MUST allow storing data on GitHub (Report 1 requires every recording in `data/raw/`). Check the wording.
 - Is TRIM_S = 1.5 s right? Check on real train data with `scripts/first_look.py` (literature: onset ≈ 0.33 s after cue).
-- Per-session values for metadata.csv (P1): electrode distance, skin preparation, sensor model, gain, ADC bits
-  (`config.py`, now "TODO-P1" / 10 bits).
+- Per-session values for metadata.csv (P1): electrode distance, skin preparation, sensor model, gain
+  (`config.py`, now "TODO-P1").
 
 ## Glossary
 - **sEMG** surface electromyography · **RMS** root mean square · **MAV** mean absolute value

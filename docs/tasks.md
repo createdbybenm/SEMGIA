@@ -30,17 +30,18 @@ Each item goes on its own branch + PR. Don't copy the professor's example (it ge
 5. Commit samples via PR `yourname/data-YYYY-MM-DD`. Log problems in MEMORY.md.
 
 ## Person 2 – AI (signal processing & models)
-**Owns:** `semgia/processing.py`, `semgia/model.py`, `scripts/train.py`, `scripts/evaluate.py`, `notebooks/`
+**Owns:** `semgia/processing.py`, `semgia/model.py`, `semgia/evaluation.py`, `semgia/report.py`, `scripts/train.py`,
+`scripts/evaluate.py`, `scripts/first_look.py`, `scripts/export_metadata.py`, `scripts/check_quality.py`, `notebooks/`
 
-1. **Now (no data needed):** `python scripts/make_mock_samples.py && python scripts/evaluate.py --data data/synthetic`.
+1. ✅ **Now (no data needed):** `python scripts/make_mock_samples.py && python scripts/evaluate.py --data data/synthetic`.
    Read `processing.sample_dataset`. Understand clean windows + baseline.
 2. **Per-placement calibration** (agreed, see MEMORY.md): once the web interface's calibration file format is known,
    change `sample_dataset` to scale with the placement's calibration (0 = rest, 1 = max contraction) instead of
    the sample's own rest phase. Add a "no calibration" column to `evaluate.py` (calibrated vs. raw).
-3. **First real samples:** notebook `notebooks/01_xx_first_look.ipynb`: plot signal + label of 3 samples.
+3. **First real samples:** `python scripts/first_look.py --data data/raw` (ready): plot signal + label of 3 samples.
    Where does the contraction really start/stop? → is `TRIM_S = 1.5` right? Are `THRESHOLD_ON/OFF` (3×/2× rest) right?
-4. **After ≥ 3 placements:** `python scripts/evaluate.py` → table into `docs/report/results.md`.
-5. **Fatigue check:** compare accuracy of `condition = fatigued` vs. `fresh` samples (small extra function in evaluate.py).
+4. **After ≥ 3 placements:** `python scripts/evaluate.py --out docs/report/results.md`.
+5. ✅ **Fatigue check:** `evaluate.py` already scores `fresh` vs. `fatigued` separately; read it on real data.
 6. **Final model:** `python scripts/train.py` → commit `models/model.joblib`. Decision + numbers → MEMORY.md.
    Only change the model if leave-one-placement-out gets better.
 

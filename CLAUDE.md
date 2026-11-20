@@ -19,7 +19,7 @@ This is a graded course project (M6 ML & IoT, Tec). **What we must hand in is in
 
 ## Architecture (don't add boxes)
 ```
-Arduino (1 kHz, serial) → our existing WEB INTERFACE (Windows 11, separate repo – being adapted):
+ESP32 (12-bit, analog 20–447 Hz + 60 Hz notch, serial) → our existing WEB INTERFACE (Windows 11, separate repo – being adapted):
    calibration once per electrode placement (rest + max contraction)
    → "Collect sample" → metadata form → 24 s with cues → data/raw/sample_NNN/ (source of truth)
 semgia/ + scripts/ (this repo): Filter → Windower → features → Calibration → Model → Smoother
