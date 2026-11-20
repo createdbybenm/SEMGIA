@@ -58,9 +58,18 @@ It is not fixed: evaluate.py compares all three below and real data decides.
 - **B – MLModel("logreg"):** log → StandardScaler → LogisticRegression on the 4 features (`models/model.joblib`).
 - **MLModel("forest"):** random forest, same input. Comparison only.
 - `scripts/evaluate.py`: leave-one-placement-out, balanced accuracy, on clean windows and on all windows.
+- **Course rule (fair split, target):** sessions are fixed as `set = train | test`. Leave-one-placement-out runs on the
+  **train** sessions only, to choose features + model. The test sessions are scored **once** at the end, as accuracy
+  next to the chance floor and the threshold floor, plus a confusion matrix. Not implemented yet.
+
+## Filters
+The analog front end has a **60 Hz notch** (Mexico mains). Software: band-pass 20–450 Hz + `NOTCH_HZ` in config
+(still 50 Hz, must become 60 Hz or be dropped → decide and document in PROTOCOL.md).
 
 ## File formats
 - `signal.csv`: `t_s,value,label` – one row per reading (24 000 rows).
 - `predictions.csv`: `t_s,prediction` – one row per 100 ms (as soon as a baseline exists).
 - `metadata.json`: `sample_id, placement_id, subject_id, operator_id, muscle, side, sensor_id, electrode_type,
   placement_notes, effort, condition, sampling_rate_hz, start_time_utc, notes`.
+- `data/metadata.csv` (course requirement, to be generated from the JSON files): one row per recording, see
+  `docs/course/requirements.md`.

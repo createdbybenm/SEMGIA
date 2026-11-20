@@ -4,6 +4,14 @@ Single-channel sEMG → **contraction / rest** classifier for **one patient, one
 It must stay robust to electrode re-placement and fatigue. Team of 4, 3 weeks (2026-11-03 → 2026-11-24).
 AI runs **locally**. Azure only stores data + predictions + metadata and shows a dashboard.
 
+## The assignment comes first
+This is a graded course project (M6 ML & IoT, Tec). **What we must hand in is in @docs/course/requirements.md.**
+- The Report 1 PDF (`docs/course/report1_assignment.md`) is authoritative. Slides are background. The PDF wins.
+- **Report 1 due Sat 2026-11-21 23:59**: required root files README.md (six parts), PROTOCOL.md, DECISIONS.md,
+  QUALITY-REPORT.md, `data/metadata.csv`, `rationale/`, `ai-tools/`, cue video, electrode photos, tags. Final class 2026-11-24.
+- Before building anything, check it serves a checklist item. Never deviate from the assignment without asking the user.
+- Fair split: choose features/models on **training sessions only**; the test sessions are opened once, at the end.
+
 ## The #1 rule: simple and robust
 - Prefer the boring solution. No new framework, service or abstraction unless MEMORY.md says the team agreed.
 - Everything must have a fallback: no sensor → `--source mock`/`file`, no Azure → offline, weak ML → threshold model.

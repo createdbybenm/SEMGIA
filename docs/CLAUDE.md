@@ -2,9 +2,10 @@
 
 | File | For |
 |---|---|
+| `course/` | **the assignment** (PDF, slides, examples) + `requirements.md` checklist; don't edit the sources |
 | `architecture.md` | how the pieces connect, data formats (imported into root CLAUDE.md) |
 | `protocol.md` | step-by-step recording procedure (placements, 10 samples each) |
-| `privacy.md` | privacy/GDPR rules, consent, what is stored where |
+| `privacy.md` | privacy rules (LFPDPPP/GDPR), consent, what is stored where |
 | `azure_setup.md` | portal steps to create + deploy the Azure resources |
 | `git_workflow.md` | beginner Git/GitHub commands for the team |
 | `tasks.md` | week-by-week tasks per role |

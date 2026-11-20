@@ -1,5 +1,8 @@
 # Recording protocol
 
+> For Report 1 this becomes the root `PROTOCOL.md` (owner P1): add the type, order, limits and source of every filter
+> (analog 60 Hz notch + software filters) and one "I read the method and I agree" line per member (own commit each).
+
 **Goal:** ~100 samples = **10 electrode placements × 10 samples**, spread over ≥ 5 different days.
 One sample = 24 s (rest 8 s → contract 8 s → rest 8 s). One placement ≈ 10 min.
 
@@ -13,7 +16,8 @@ One sample = 24 s (rest 8 s → contract 8 s → rest 8 s). One placement ≈ 10
 ## Electrode placement (new placement ID each time electrodes go on)
 1. Clean the skin with alcohol, let it dry. Shave if necessary.
 2. 2 electrodes over the muscle belly along the fibre direction (~2 cm apart), reference electrode on bone (e.g. elbow).
-3. Use the next placement ID: E01, E02, … Note the position in a few words. Photos: electrodes only, not in Git.
+3. Use the next placement ID: E01, E02, … Note the position in a few words.
+4. **Take one photo of the electrodes** (no face, nothing identifying) → `figures/placement_EXX.jpg` (course requirement).
 
 ## Calibrate (once per placement)
 Run the web interface's calibration sequence right after the electrodes are on: rest, then **maximum contraction**.
@@ -22,7 +26,7 @@ Save it under the placement ID (exact file format: to be defined when the web in
 ## Record
 In the web interface (Windows 11). Backup if it isn't ready: `python scripts/record.py --source serial --port COM3`.
 1. Press **Collect sample** → fill in the form (pre-filled from the last sample) → **Start recording (24 s)**.
-2. The subject follows the banner: green **REST**, red **CONTRACT**. Hold the contraction steadily for the whole 8 s.
+2. The subject follows the banner: green **REST**, red **CONTRACT**. (Screen-record one sample once → this is our **cue video**, `cue/`.) Hold the contraction steadily for the whole 8 s.
 3. After 24 s it shows "Saved sample_NNN". Wait ~10 s (relax), then the next sample.
 
 **The 10 samples of one placement:**
