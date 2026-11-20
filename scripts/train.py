@@ -14,14 +14,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from semgia import config  # noqa: E402
 from semgia.model import MLModel  # noqa: E402
 from semgia.processing import sample_dataset  # noqa: E402
+from semgia.report import check_signal  # noqa: E402
 from semgia.storage import list_samples, load_sample  # noqa: E402
 
 
 def load_all(data: Path) -> list[dict]:
-    """One dict per sample: id, placement, X/y (clean windows) and X_all/y_all (every window)."""
+    """One dict per sample: id, placement, X/y (clean windows) and X_all/y_all (every window).
+    Samples that fail the quality rule (QUALITY-REPORT.md) are skipped."""
     out = []
     for d in list_samples(data):
         df, meta = load_sample(d)
+        reason = check_signal(df)
+        if reason:
+            print(f"skip {meta['sample_id']} (rejected: {reason})")
+            continue
         X, y = sample_dataset(df, clean_only=True)
         X_all, y_all = sample_dataset(df, clean_only=False)
         out.append({"id": meta["sample_id"], "placement": meta["placement_id"],
