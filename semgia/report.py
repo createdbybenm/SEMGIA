@@ -59,7 +59,7 @@ def check_signal(df: pd.DataFrame) -> str:
     n_limit = int(((df.value == 0) | (df.value == adc_max)).sum())
     if n_limit:
         reasons.append(f"{n_limit} values at ADC limit (0 or {adc_max})")
-    gaps = int((np.diff(df.t_s.to_numpy()) > 1.5 / config.FS).sum())   # t_s step should be 1/FS
+    gaps = int((np.diff(df.t_s.to_numpy()) > config.GAP_TOLERANCE_S).sum())
     if gaps:
         reasons.append(f"{gaps} gaps in t_s (missing rows)")
     if abs(len(df) - SAMPLE_N) > config.MAX_LENGTH_DEVIATION * SAMPLE_N:

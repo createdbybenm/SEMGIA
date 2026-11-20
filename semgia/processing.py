@@ -26,7 +26,7 @@ class Filter:
         if raw:
             high = min(config.BANDPASS_HZ[1], 0.45 * fs)
             bp = signal.butter(4, [config.BANDPASS_HZ[0], high], btype="bandpass", fs=fs, output="sos")
-            b, a = signal.iirnotch(config.NOTCH_HZ, 30, fs=fs)
+            b, a = signal.iirnotch(config.NOTCH_HZ, config.NOTCH_Q, fs=fs)
             self.sos = np.vstack([bp, signal.tf2sos(b, a)])
         self.zi = None
 
@@ -110,6 +110,16 @@ def window_features(x: np.ndarray, fs: int = config.FS) -> tuple[np.ndarray, np.
     return ends, feats
 
 
+def sample_calibration(labels: np.ndarray, ends: np.ndarray, feats: np.ndarray) -> Calibration:
+    """Rest baseline of one sample = clean windows of its first rest phase.
+    This is the current per-sample calibration (per-placement calibration is planned)."""
+    if labels[0] != config.REST:
+        raise ValueError("a sample must start with rest (needed for the baseline)")
+    changes = np.flatnonzero(np.diff(labels)) + 1
+    first_change = changes[0] if len(changes) else len(labels)
+    return Calibration.from_rest(feats[clean_mask(ends, [], first_change)])
+
+
 def sample_dataset(df, clean_only: bool = True) -> tuple[np.ndarray, np.ndarray]:
     """signal.csv DataFrame (columns t_s, value, label) -> normalized features X and labels y.
 
@@ -117,12 +127,9 @@ def sample_dataset(df, clean_only: bool = True) -> tuple[np.ndarray, np.ndarray]
     clean_only=False: every window, labelled at its centre (realistic test incl. transitions).
     """
     labels = df["label"].to_numpy()
-    if labels[0] != config.REST:
-        raise ValueError("a sample must start with rest (needed for the baseline)")
     ends, feats = window_features(df["value"].to_numpy())
     changes = np.flatnonzero(np.diff(labels)) + 1
-    first_change = changes[0] if len(changes) else len(labels)
-    calib = Calibration.from_rest(feats[clean_mask(ends, [], first_change)])
+    calib = sample_calibration(labels, ends, feats)
     if clean_only:
         keep = clean_mask(ends, changes, len(labels))
         y = labels[ends[keep] - 1]

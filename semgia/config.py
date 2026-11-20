@@ -8,6 +8,7 @@ RAW_SIGNAL = True         # False if the sensor outputs an envelope (e.g. MyoWar
 BANDPASS_HZ = (20, 450)   # only used when RAW_SIGNAL is True
 NOTCH_HZ = 60             # mains frequency (Mexico); the analog front end also has a 60 Hz notch,
                           # this one is a safety net
+NOTCH_Q = 30              # notch quality factor: width = NOTCH_HZ / NOTCH_Q = 2 Hz
 
 # --- Windowing ---
 WINDOW_S = 0.200          # 200 ms windows
@@ -36,6 +37,7 @@ GAIN = "TODO-P1"                    # analog gain of the sensor board
 ADC_BITS = 10                       # Arduino Uno: 10-bit ADC (0..1023) - check with P1
 
 # --- Quality check (QUALITY-REPORT.md) ---
+GAP_TOLERANCE_S = 1.5 / FS          # t_s step should be 1/FS; a step > 1.5 samples = a missing row
 MAX_LENGTH_DEVIATION = 0.02         # reject if the row count is off by > 2 % from the expected 24 000
 
 # --- Model ---
