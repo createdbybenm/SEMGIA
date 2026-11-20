@@ -4,13 +4,17 @@ data/raw/sample_NNN/ and uploaded to Azure if a connection string is set.
 
     python scripts/record.py --source mock
     python scripts/record.py --source serial --port COM3
-    python scripts/record.py --source file --file data/raw/sample_001/signal.csv
+    python scripts/record.py --source file --file data/raw/sample_001/signal.csv   # demo fallback
+
+--source file replays a recorded sample: "Collect sample" restarts the file so the cues match it, and the
+result goes to data/demo/ (gitignored), never into data/raw/.
 
 Headless (no window, records --count samples with the metadata from the command line):
     python scripts/record.py --no-gui --source mock --subject P001 --operator OP01 --placement-id E01
 """
 
 import argparse
+import json
 import logging
 import sys
 import time
@@ -24,7 +28,7 @@ from semgia import config  # noqa: E402
 from semgia.model import MLModel, ThresholdModel  # noqa: E402
 from semgia.recorder import LivePredictor, SampleRecorder  # noqa: E402
 from semgia.sources import FileSource, MockSource, SerialSource  # noqa: E402
-from semgia.storage import AzureUploader, last_metadata, make_metadata  # noqa: E402
+from semgia.storage import AzureUploader, last_metadata, list_samples, make_metadata  # noqa: E402
 
 CUE_TEXT = {config.REST: "REST", config.CONTRACT: "CONTRACT"}
 # form fields: (metadata key, label, dropdown choices or None for a text box)
@@ -52,9 +56,18 @@ class App:
         self.recorder: SampleRecorder | None = None
         self.plot_buf = np.zeros(5 * config.FS)
         self.status = "Ready. Press 'Collect sample'."
+        self.number = 0  # "sample <number> of SAMPLES_PER_PLACEMENT" for the running sample
+
+    def count(self, placement_id: str) -> int:
+        """Samples already saved for this placement."""
+        return sum(json.loads((d / "metadata.json").read_text()).get("placement_id") == placement_id
+                   for d in list_samples(self.out))
 
     def start_sample(self, **fields) -> None:
         meta = make_metadata(root=self.out, **fields)  # raises ValueError on bad IDs
+        self.number = self.count(meta["placement_id"]) + 1
+        if hasattr(self.source, "rewind"):  # replay: start the file again so the cues match it
+            self.source.rewind()
         uploader = AzureUploader(meta, conn_str=None if self.upload else "")
         self.recorder = SampleRecorder(meta, self.predictor.total, self.out, uploader)
         self.status = f"Recording {meta['sample_id']} ..."
@@ -99,6 +112,9 @@ def run_gui(app: App, scale: float = 1.0) -> None:
     # big coloured banner: the subject must read it from a distance
     cue_lbl = tk.Label(root, text="", font=("Helvetica", int(60 * scale), "bold"), fg="white", pady=20)
     cue_lbl.pack(fill="x")
+    count_lbl = tk.Label(root, text="", font=("Helvetica", int(30 * scale), "bold"))
+    count_lbl.pack()
+    last_cue = [None]  # beep when the cue changes
     ai_lbl = tk.Label(root, text="", font=("Helvetica", int(26 * scale)), pady=8)
     ai_lbl.pack()
 
@@ -153,15 +169,22 @@ def run_gui(app: App, scale: float = 1.0) -> None:
             cue, left = rec.cue()
             cue_lbl.configure(text=f"{CUE_TEXT[cue]}  {left:4.1f} s",
                               bg="#c0392b" if cue == config.CONTRACT else "#27ae60")
+            count_lbl.configure(text=f"Sample {app.number} of {config.SAMPLES_PER_PLACEMENT}"
+                                     f"  ·  {rec.meta['placement_id']}")
             collect_btn.configure(state="disabled")
         else:
+            cue = None
             cue_lbl.configure(text="ready", bg="#7f8c8d")
+            count_lbl.configure(text="")
             collect_btn.configure(state="normal")
+        if cue != last_cue[0]:
+            root.bell()  # start, every REST <-> CONTRACT switch, and the end
+            last_cue[0] = cue
         pred = app.predictor.pred
         if app.predictor.calib is None:
-            ai_lbl.configure(text="AI: waiting for a rest baseline (first 8 s of a sample)", fg="gray")
+            ai_lbl.configure(text="Calibrating – stay relaxed", fg="gray")
         else:
-            ai_lbl.configure(text=f"AI says: {'CONTRACTION' if pred == config.CONTRACT else 'rest'}",
+            ai_lbl.configure(text="CONTRACTION" if pred == config.CONTRACT else "REST",
                              fg="red" if pred == config.CONTRACT else "green")
         status_lbl.configure(text=app.status)
         line.set_ydata(app.plot_buf)
@@ -186,7 +209,7 @@ def main() -> None:
     p.add_argument("--port", default="/dev/ttyACM0", help="serial port (Windows: COM3)")
     p.add_argument("--file", help="signal.csv to replay with --source file")
     p.add_argument("--model", choices=["threshold", "ml"], default="threshold")
-    p.add_argument("--out", default=str(config.DATA_RAW), help="where samples are saved")
+    p.add_argument("--out", help="where samples are saved (default data/raw, with --source file data/demo)")
     p.add_argument("--no-upload", action="store_true")
     p.add_argument("--font-scale", type=float, default=1.0, help="bigger/smaller text, e.g. 2 on a 4K screen")
     g = p.add_argument_group("headless mode")
@@ -205,11 +228,14 @@ def main() -> None:
     if a.source == "mock":
         source = MockSource()
     elif a.source == "file":
+        if not a.file:
+            p.error("--source file needs --file data/raw/sample_NNN/signal.csv")
         source = FileSource(a.file)
     else:
         source = SerialSource(a.port)
     model = MLModel.load() if a.model == "ml" else ThresholdModel()
-    app = App(source, model, Path(a.out), upload=not a.no_upload)
+    out = Path(a.out) if a.out else config.DATA_DEMO if a.source == "file" else config.DATA_RAW
+    app = App(source, model, out, upload=not a.no_upload and a.source != "file")
 
     try:
         if a.no_gui:

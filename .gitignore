@@ -15,6 +15,7 @@ venv/
 # generated data
 data/synthetic/
 data/processed/
+data/demo/
 
 # editors / os
 .vscode/

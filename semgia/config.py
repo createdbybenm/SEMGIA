@@ -19,6 +19,7 @@ STEP = int(STEP_S * FS)
 REST, CONTRACT = 0, 1
 SAMPLE_STEPS = [(REST, 8), (CONTRACT, 8), (REST, 8)]   # (label, seconds)
 WARNING_S = 0             # no warning cue before the contraction (open question)
+SAMPLES_PER_PLACEMENT = 10  # plan per placement (= web page N_PLAN): cue screen shows "sample 4 of 10"
 TRIM_S = 1.5              # windows closer than this to a label change / the start / the end are not "clean"
                           # -> each 8 s phase keeps its middle 5 s for training
 
@@ -61,4 +62,5 @@ TABLE_PREDICTIONS = "predictions"
 ROOT = Path(__file__).resolve().parent.parent
 DATA_RAW = ROOT / "data" / "raw"
 DATA_SYNTHETIC = ROOT / "data" / "synthetic"
+DATA_DEMO = ROOT / "data" / "demo"      # record.py --source file saves here (replays are not real samples)
 MODELS = ROOT / "models"

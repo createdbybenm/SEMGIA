@@ -1,7 +1,8 @@
 # dashboard/ – Streamlit dashboard (runs on Azure App Service)
 
-`app.py` shows: the sample list, metadata (placement, effort, condition), the 24 s raw signal and the share of time in
-contraction per 2 s chunk.
+`app.py` shows: the sample list, metadata (placement, effort, condition), the 24 s raw signal, the timer label line
+next to the AI output (0/1 per 100 ms window) with AI contraction % + agreement %, and a table of contraction % and
+agreement % per sample. `STEPS` is a copy of `config.SAMPLE_STEPS` (self-contained): change both together.
 
 ## Rules
 - **Read-only.** The dashboard never writes to Azure.

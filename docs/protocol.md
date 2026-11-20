@@ -20,14 +20,19 @@ One sample = 24 s (rest 8 s → contract 8 s → rest 8 s). One placement ≈ 10
 4. **Take one photo of the electrodes** (no face, nothing identifying) → `figures/placement_EXX.jpg` (course requirement).
 
 ## Calibrate (once per placement)
-Run the web interface's calibration sequence right after the electrodes are on: rest, then **maximum contraction**.
-Save it under the placement ID (exact file format: to be defined when the web interface is adapted).
+Web page (Wi-Fi `SEMGIA-EMG`, `http://192.168.4.1`): fill in Sujeto `P001`, Operador `OP01`, Colocación `E01`,
+then **1· Calibrar colocación** right after the electrodes are on. The machine guides: rest, then **maximum
+contraction**. The page downloads `semgia_calib_E01_*.json` (needs the machine/station switched on).
 
 ## Record
 In the web interface (Windows 11). Backup if it isn't ready: `python scripts/record.py --source serial --port COM3`.
-1. Press **Collect sample** → fill in the form (pre-filled from the last sample) → **Start recording (24 s)**.
-2. The subject follows the banner: green **REST**, red **CONTRACT**. (Screen-record one sample once → this is our **cue video**, `cue/`.) Hold the contraction steadily for the whole 8 s.
-3. After 24 s it shows "Saved sample_NNN". Wait ~10 s (relax), then the next sample.
+1. Press **2· Tomar muestra** → check the form (effort/condition pre-filled from the plan below) → **Comenzar (24 s)**.
+2. The subject follows the full-screen cue + beeps: green **REPOSO**, red **¡CONTRAIGA!**. Hold steadily for the whole 8 s.
+   (Screen-record one sample once → this is our **cue video**, `cue/`.)
+   Keep the page in the foreground. If it says "Muestra NO guardada", just repeat that sample.
+3. After 24 s the page downloads `semgia_sample_E01_*.json`. Wait ~10 s (relax), then the next sample.
+4. At the end, on the recording laptop: `python scripts/import_web.py` (add `--upload` if `.env` is set)
+   → `data/raw/sample_NNN/` + `data/raw/calibration_E01/`.
 
 **The 10 samples of one placement:**
 | # | Effort | Condition | How |
