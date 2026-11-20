@@ -1,13 +1,12 @@
-"""Filtering, windowing, features, clean-window selection and rest-baseline calibration.
+"""Windowing, features, clean-window selection and rest-baseline calibration (no digital filter).
 
-The live app and the offline scripts use exactly the same classes (causal filter
-with state + Windower), so features are identical in both.
+The live app and the offline scripts use exactly the same classes (Filter pass-through +
+Windower + features), so features are identical in both.
 """
 
 from dataclasses import dataclass
 
 import numpy as np
-from scipy import signal
 
 from semgia import config
 
@@ -15,33 +14,17 @@ FEATURE_NAMES = ["rms", "mav", "wl", "zc"]
 
 
 class Filter:
-    """Causal filter that keeps its state between chunks.
-
-    Raw EMG: bandpass + notch. Envelope sensor: passed through unchanged
-    (a high-pass would erase a sustained contraction).
+    """No digital filter: the analog front end already band-passes (20-447 Hz) and notches 60 Hz
+    (Ben, 2026-11-19). This pass-through only keeps one interface for live and offline code,
+    so a digital filter could be added back in one place if real data ever needs it.
     """
 
-    def __init__(self, fs: int = config.FS, raw: bool = config.RAW_SIGNAL):
-        self.raw = raw
-        if raw:
-            high = min(config.BANDPASS_HZ[1], 0.45 * fs)
-            bp = signal.butter(4, [config.BANDPASS_HZ[0], high], btype="bandpass", fs=fs, output="sos")
-            b, a = signal.iirnotch(config.NOTCH_HZ, 30, fs=fs)
-            self.sos = np.vstack([bp, signal.tf2sos(b, a)])
-        self.zi = None
-
     def process(self, x: np.ndarray) -> np.ndarray:
-        x = np.asarray(x, dtype=float)
-        if not self.raw or len(x) == 0:
-            return x
-        if self.zi is None:  # start the filter at the first value -> no startup spike
-            self.zi = signal.sosfilt_zi(self.sos) * x[0]
-        y, self.zi = signal.sosfilt(self.sos, x, zi=self.zi)
-        return y
+        return np.asarray(x, dtype=float)
 
 
 class Windower:
-    """Push filtered samples in, get complete windows out (WINDOW long, every STEP)."""
+    """Push samples in, get complete windows out (WINDOW long, every STEP)."""
 
     def __init__(self, window: int = config.WINDOW, step: int = config.STEP):
         self.window = window
@@ -62,8 +45,16 @@ class Windower:
         return out
 
 
-def features(w: np.ndarray) -> np.ndarray:
-    """RMS, mean absolute value, waveform length, zero crossings of one window."""
+def features(w: np.ndarray, raw: bool = config.RAW_SIGNAL) -> np.ndarray:
+    """RMS, mean absolute value, waveform length, zero crossings of one window.
+
+    Raw EMG: the window mean is subtracted first. The ESP32 reads 0..4095 and rest sits at ~2048,
+    so without this ZC would always be 0 and RMS/MAV would measure the offset, not the muscle.
+    Envelope sensor (raw=False): NO mean subtraction, it would erase a sustained contraction.
+    """
+    w = np.asarray(w, dtype=float)
+    if raw:
+        w = w - w.mean()
     return np.array([
         np.sqrt(np.mean(w ** 2)),
         np.mean(np.abs(w)),
@@ -104,10 +95,20 @@ class Calibration:
 
 def window_features(x: np.ndarray, fs: int = config.FS) -> tuple[np.ndarray, np.ndarray]:
     """Offline: whole signal -> (end_indices, feature matrix)."""
-    pairs = Windower().push(Filter(fs).process(x))
+    pairs = Windower().push(Filter().process(x))
     ends = np.array([e for e, _ in pairs], dtype=int)
     feats = np.array([features(w) for _, w in pairs]).reshape(-1, len(FEATURE_NAMES))
     return ends, feats
+
+
+def sample_calibration(labels: np.ndarray, ends: np.ndarray, feats: np.ndarray) -> Calibration:
+    """Rest baseline of one sample = clean windows of its first rest phase.
+    This is the current per-sample calibration (per-placement calibration is planned)."""
+    if labels[0] != config.REST:
+        raise ValueError("a sample must start with rest (needed for the baseline)")
+    changes = np.flatnonzero(np.diff(labels)) + 1
+    first_change = changes[0] if len(changes) else len(labels)
+    return Calibration.from_rest(feats[clean_mask(ends, [], first_change)])
 
 
 def sample_dataset(df, clean_only: bool = True) -> tuple[np.ndarray, np.ndarray]:
@@ -117,12 +118,9 @@ def sample_dataset(df, clean_only: bool = True) -> tuple[np.ndarray, np.ndarray]
     clean_only=False: every window, labelled at its centre (realistic test incl. transitions).
     """
     labels = df["label"].to_numpy()
-    if labels[0] != config.REST:
-        raise ValueError("a sample must start with rest (needed for the baseline)")
     ends, feats = window_features(df["value"].to_numpy())
     changes = np.flatnonzero(np.diff(labels)) + 1
-    first_change = changes[0] if len(changes) else len(labels)
-    calib = Calibration.from_rest(feats[clean_mask(ends, [], first_change)])
+    calib = sample_calibration(labels, ends, feats)
     if clean_only:
         keep = clean_mask(ends, changes, len(labels))
         y = labels[ends[keep] - 1]

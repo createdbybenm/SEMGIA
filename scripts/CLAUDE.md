@@ -4,8 +4,11 @@
 |---|---|---|
 | `record.py` | recording app: live plot + AI, "Collect sample" button, metadata form, 24 s cues | `python scripts/record.py --source mock` |
 | `make_mock_samples.py` | fake samples instantly → `data/synthetic/` (5 placements × 10) | `python scripts/make_mock_samples.py` |
-| `train.py` | clean windows of all samples → `models/model.joblib` | `python scripts/train.py --data data/synthetic` |
-| `evaluate.py` | leave-one-placement-out: threshold vs. logreg vs. forest, clean + all windows | `python scripts/evaluate.py` |
+| `train.py` | clean windows of all **train** samples → `models/model.joblib` (`--kind logreg\|lda\|forest`) | `python scripts/train.py --data data/synthetic` |
+| `evaluate.py` | leave-one-placement-out on train placements: threshold floor vs. logreg/lda/forest; `--final` = test once; `--out x.md` | `python scripts/evaluate.py` |
+| `export_metadata.py` | `data/metadata.csv` (course columns + `file_name` + our fields) | `python scripts/export_metadata.py` |
+| `check_quality.py` | quality rule → `QUALITY-REPORT.md` (train/evaluate skip rejected samples) | `python scripts/check_quality.py` |
+| `first_look.py` | one PNG per sample → `figures/first_look/`: check TRIM_S and thresholds by eye | `python scripts/first_look.py --samples sample_001` |
 | `upload_sample.py` | push offline-recorded samples to Azure | `python scripts/upload_sample.py data/raw/sample_007` |
 
 ## record.py
@@ -22,3 +25,4 @@
 - Scripts import from `semgia`. No signal-processing logic in here.
 - Each script starts with a docstring showing how to run it. Keep it up to date.
 - Every script must work with mock data (no hardware, no Azure).
+- `evaluate.py --final` opens the test set. Run it once, at the end. Never commit outputs made from `data/synthetic`.

@@ -18,11 +18,11 @@ Status as of 2026-11-19. The files must sit at the **repo root**, with exactly t
 | # | Required | Our status / source in repo | Owner |
 |---|---|---|---|
 | 1 | `README.md`: six parts (see below) + team table: member code, GitHub user, role, AI tool | README is a dev quickstart → **rewrite** (keep dev part lower down) | P4 |
-| 2 | `PROTOCOL.md`: method, **type, order and limits of every filter + source** (analog 60 Hz notch AND software filters), 1 line per member "I read the method and I agree" (own commit each) | `docs/protocol.md` exists → move to root and extend | P1 |
+| 2 | `PROTOCOL.md`: method, **type, order and limits of every filter + source** (ours: analog band-pass 20–447 Hz + 60 Hz notch, no software filter), 1 line per member "I read the method and I agree" (own commit each) | `docs/protocol.md` exists → move to root and extend | P1 |
 | 3 | `data/raw/`: **every** recording, untouched (train **and** test sessions) | `data/raw/sample_NNN/` folders, no data yet | P1 |
-| 4 | `data/metadata.csv`: one row per recording, columns below | missing → `scripts/export_metadata.py` (task) | P2 |
-| 5 | `QUALITY-REPORT.md`: one row per recording + reason for each rejection | missing → `scripts/check_quality.py` (task) | P2 |
-| 6 | `DECISIONS.md`: parts 7 Features, 8 Model, 9 Route (chose / reason in own words / not understood yet) | content exists in docs/architecture.md, file missing | P2 (7, 8), P3 (9) |
+| 4 | `data/metadata.csv`: one row per recording, columns below | `scripts/export_metadata.py` done (per-session constants TODO-P1 in config.py); run on real data | P2 |
+| 5 | `QUALITY-REPORT.md`: one row per recording + reason for each rejection | `scripts/check_quality.py` done (rule fixed, written before any score); run on real data | P2 |
+| 6 | `DECISIONS.md`: parts 7 Features, 8 Model, 9 Route (chose / reason in own words / not understood yet) | draft at root: 7 + 8 done (Ben rewrites reasons in own words), 9 open | P2 (7, 8), P3 (9) |
 | 7 | `rationale/Mxx.md`: ~100 words, own words, one group choice you support or doubt + why + 1 source | missing | **each member** |
 | 8 | `ai-tools/Mxx.png`: screenshot of your AI tool open on this project with one question | missing | **each member** |
 | 9 | cue video (e.g. `cue/cue-video.mp4`, screen recording of our REST/CONTRACT cues) | missing | P1 / P4 |
@@ -56,12 +56,13 @@ unchanged unless the team agrees otherwise.
   **Choose features and model with the training sessions only** (our leave-one-placement-out runs inside train).
   **Open the test sessions once, at the end.** Anything else = leakage.
 - **Keep about the same amount of movement and rest.** Ours: 8 s move vs. 16 s rest per sample (clean: 5 s vs. 10 s).
-  → handle it in training (class weights / balanced windows) and say so in DECISIONS.md. Open.
+  → decided: class weights in training, no resampling (MEMORY.md 2026-11-19, DECISIONS.md part 8).
 - **Cleaning rule written before any score:** reject a recording/trial if a sample sits at the ADC limit (0 or
   2^bits − 1), if samples are missing, or if its length is off by > 2 % from 24 000 (course check, slides 15).
-- **Filters:** the analog front end already has a **60 Hz notch** (Mexico mains). The software notch in `config.py`
-  (`NOTCH_HZ = 50`) is wrong for this setup → set 60 Hz or drop it, and write the choice + source in PROTOCOL.md.
-  Band-pass upper limit must be < Fs/2 (course band 20–450 Hz, source: course / McManus 2020).
+- **Filters:** no digital filter (analog band-pass 20-447 Hz + 60 Hz notch); software only removes the offset per
+  window - done. Write the analog filters + source in PROTOCOL.md.
+  Band-pass upper limit must be < Fs/2 (course band 20–450 Hz, source: course / McManus 2020). Ours: 447 Hz < 500 Hz
+  if FS = 1000 Hz (FS on the ESP32 still to confirm).
 - **Report the score next to its floors:** chance (≈ 50 % with balanced classes) and a single threshold on one feature
   (our `ThresholdModel`), plus a confusion matrix. Course metric = accuracy; we also give balanced accuracy.
 - **Don't copy the example.** Own movement, own seconds, own words.
@@ -83,5 +84,4 @@ Also: norms (research vs. medical product, COFEPRIS), consent signed before the 
   keep the dashboard in Azure and use Colab for documentation.
 - Slides: "test data only in Azure", PDF: every recording in `data/raw/` → we follow the PDF for Report 1.
 - Do we need a warning cue (`warning_s`)? Current protocol has none (0 s).
-- How do we balance movement vs. rest (protocol change vs. class weights)?
 - Professor's GitHub user (to add as collaborator).

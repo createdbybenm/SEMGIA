@@ -51,12 +51,11 @@ class MockSource(Source):
     def generate(self, n: int) -> np.ndarray:
         """Generate n samples immediately (used for offline mock samples)."""
         burst, self.zi = signal.sosfilt(self.sos, self.rng.normal(size=n), zi=self.zi)
-        t = (self.n + np.arange(n)) / self.fs
         amp = 60 * self.gain * (1 + 0.5 * self.fatigue) if self.cue == config.CONTRACT else 0
-        hum = 3 * np.sin(2 * np.pi * config.NOTCH_HZ * t)
-        x = 512 + self.rng.normal(scale=4, size=n) + hum + amp * burst
+        # like the ESP32: mid-scale offset, no mains hum (the analog notch removes it)
+        x = config.ADC_MID + self.rng.normal(scale=4, size=n) + amp * burst
         self.n += n
-        return np.clip(np.round(x), 0, 1023)
+        return np.clip(np.round(x), 0, 2 ** config.ADC_BITS - 1)
 
     def read(self) -> np.ndarray:
         now = time.monotonic()

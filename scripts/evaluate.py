@@ -1,58 +1,71 @@
-"""Leave-one-placement-out evaluation: threshold vs. logistic regression vs. random forest.
+"""Fair-split evaluation: floor (threshold) vs. ML models (logreg, lda, forest).
 
-Train on all electrode placements except one, test on the held-out placement
-(= "electrodes were re-applied"). Score = balanced accuracy (rest is 2/3 of every sample,
-so plain accuracy would look too good).
-  clean: only the clean middle of each phase (what we trained on)
-  all:   every window incl. transitions (what the live app really sees)
+Scores: accuracy + balanced accuracy, overall, fresh vs. fatigued, per placement, confusion matrices.
+
+Sessions (= placements) are fixed as train or test in config.TEST_PLACEMENTS.
+  default:  leave-one-placement-out on the TRAIN placements only -> use this to choose features + model.
+            Each held-out placement = "electrodes were re-applied". Test samples are never touched.
+  --final:  train on all train samples, score the test placements ONCE. Do not tune anything afterwards.
+Windows:  clean = middle of each phase (what we train on), all = every window incl. transitions,
+          smoothed = all windows after majority-vote smoothing (Smoother, = what the live app shows).
+Floors:   chance = share of the majority class; threshold (floor) = one threshold on RMS (ThresholdModel).
 
     python scripts/evaluate.py --data data/synthetic
+    python scripts/evaluate.py --out docs/report/results.md
+    python scripts/evaluate.py --final --out docs/report/final.md
 """
 
 import argparse
 import sys
 from pathlib import Path
 
-import numpy as np
-from sklearn.metrics import balanced_accuracy_score
-
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from semgia import config  # noqa: E402
-from semgia.model import MLModel, ThresholdModel  # noqa: E402
+from semgia.evaluation import (  # noqa: E402
+    confusion_markdown,
+    confusions,
+    final_predictions,
+    lopo_predictions,
+    markdown_table,
+    score_table,
+    split_train_test,
+)
 from train import load_all  # noqa: E402
-
-MODELS = ["threshold", "logreg", "forest"]
-
-
-def score(model, samples: list[dict], key: str) -> float:
-    """Balanced accuracy over the test samples (each sample predicted separately, like live)."""
-    y = np.concatenate([s["y" + key] for s in samples])
-    pred = np.concatenate([model.predict_many(s["X" + key]) for s in samples])
-    return balanced_accuracy_score(y, pred)
 
 
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--data", default=str(config.DATA_RAW))
+    p.add_argument("--final", action="store_true", help="score the test placements once (end of project)")
+    p.add_argument("--out", help="also write the tables as Markdown to this file")
     a = p.parse_args()
-    samples = load_all(Path(a.data))
-    placements = sorted({s["placement"] for s in samples})
-    if len(placements) < 2:
-        sys.exit("Need at least 2 electrode placements (E01, E02, ...) for leave-one-placement-out")
+    train, test = split_train_test(load_all(Path(a.data)))
+    print(f"train placements: {sorted({s['placement'] for s in train})} ({len(train)} samples), "
+          f"test placements: {config.TEST_PLACEMENTS} ({len(test)} samples)")
+    try:
+        if a.final:
+            preds, title = final_predictions(train, test), "Final score on the test placements"
+            print("\n" + "!" * 70)
+            print("!!! TEST SET OPENED - final score, do not tune after this !!!")
+            print("!" * 70)
+        else:
+            preds, title = lopo_predictions(train), "Leave-one-placement-out on the train placements"
+    except ValueError as e:
+        sys.exit(str(e))
 
-    cols = [f"{m} {k}" for m in MODELS for k in ("clean", "all")]
-    print(f"{'held out':<10}{'n':>4}" + "".join(f"{c:>17}" for c in cols))
-    results = []
-    for held in placements:
-        test = [s for s in samples if s["placement"] == held]
-        train = [s for s in samples if s["placement"] != held]
-        X = np.vstack([s["X"] for s in train])
-        y = np.concatenate([s["y"] for s in train])
-        models = [ThresholdModel(), MLModel("logreg").fit(X, y), MLModel("forest").fit(X, y)]
-        row = [score(m, test, k) for m in models for k in ("", "_all")]
-        results.append(row)
-        print(f"{held:<10}{len(test):>4}" + "".join(f"{v:>17.3f}" for v in row))
-    print(f"{'MEAN':<14}" + "".join(f"{v:>17.3f}" for v in np.mean(results, axis=0)))
+    sections = [(title, markdown_table(score_table(preds))),
+                ("Fresh vs. fatigued", markdown_table(score_table(preds, by=["condition"]))),
+                ("Per placement", markdown_table(score_table(preds, by=["placement"]))),
+                ("Confusion matrices (all windows, rows = true)", confusion_markdown(confusions(preds)))]
+    text = "\n\n".join(f"## {h}\n\n{t}" for h, t in sections) + "\n"
+    print("\n" + text)
+    if a.out:
+        Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+        flag = " --final" if a.final else ""
+        header = f"# Evaluation ({'final' if a.final else 'train only'})\n\n"
+        header += f"Generated by `python scripts/evaluate.py{flag}`.\n\n"
+        Path(a.out).write_text(header + text)
+        print(f"-> {a.out}")
 
 
 if __name__ == "__main__":

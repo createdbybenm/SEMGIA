@@ -15,17 +15,25 @@ def test_windower_same_result_chunked_and_whole():
         assert e1 == e2 and np.allclose(w1, w2)
 
 
-def test_filter_chunked_equals_whole():
-    x = 512 + np.random.default_rng(1).normal(size=3000)
-    whole = Filter().process(x)
+def test_filter_is_pass_through():
+    """No digital filter (analog front end filters). Chunked == whole stays true."""
+    x = config.ADC_MID + np.random.default_rng(1).normal(size=3000)
     f = Filter()
     chunked = np.concatenate([f.process(c) for c in np.array_split(x, 11)])
-    assert np.allclose(whole, chunked)
+    assert np.allclose(Filter().process(x), x) and np.allclose(chunked, x)
+
+
+def test_features_ignore_adc_offset():
+    """ESP32 rest sits at ~2048: the same muscle signal must give the same features at any offset."""
+    w = np.random.default_rng(2).normal(scale=10, size=config.WINDOW)
+    assert np.allclose(features(w), features(w + config.ADC_MID))
+    assert features(w + config.ADC_MID)[3] > 0          # zero crossings still counted
 
 
 def test_envelope_mode_keeps_sustained_level():
-    x = np.r_[np.full(2000, 20.0), np.full(8000, 300.0)]
-    assert np.allclose(Filter(raw=False).process(x), x)
+    """Envelope sensor: no mean subtraction, a steady contraction keeps its level."""
+    rms, mav, wl, zc = features(np.full(config.WINDOW, 300.0), raw=False)
+    assert rms == mav == 300 and wl == 0
 
 
 def test_features_of_known_signal():
