@@ -60,6 +60,10 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - 2026-11-03 – Pseudonyms P001 / OP01. Name list only on paper. EU Azure region. Repo stays private (also: course material in docs/course is students-only).
 
 ## Current status (2026-11-21)
+- 2026-11-20 CO – **Azure is set up** (subscription "Azure for Students", not "ITESM - LabVirtual"): `rg-semgia`,
+  Storage `semgiadatabossvl` in **belgiumcentral** (westeurope is blocked by the student policy; belgiumcentral is the
+  only allowed EU region). Tested: mock sample uploads live, offline sample uploads later, `scripts/delete_sample.py`.
+  Connection string: ask CO privately, never in Git.
 - **Report 1 due Sat 2026-11-21 23:59.** Done: README (six parts + team table), PROTOCOL.md (method + filter table),
   DECISIONS.md 7–9, data/raw + metadata.csv + QUALITY-REPORT, rationale/M02, ai-tools/M02, tags, professor invited.
   Missing: cue video (`cue/`), one electrode photo per session (`figures/`), rationale + ai-tools + PROTOCOL agreement
