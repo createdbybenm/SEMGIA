@@ -9,7 +9,14 @@ from semgia import config
 from semgia.model import ThresholdModel
 from semgia.recorder import SAMPLE_N, LivePredictor, SampleRecorder
 from semgia.sources import MockSource
-from semgia.storage import AzureUploader, LocalWriter, load_sample, make_metadata, next_sample_id
+from semgia.storage import (
+    AzureUploader,
+    LocalWriter,
+    delete_sample,
+    load_sample,
+    make_metadata,
+    next_sample_id,
+)
 
 IDS = dict(subject_id="P001", operator_id="OP01", placement_id="E01")
 
@@ -96,6 +103,54 @@ def test_uploader_bad_connection_string_never_raises(tmp_path):
     up.send(0, 0.0, [1, 2, 3], [0])
     up.close(timeout=5)
     assert not up.enabled
+
+
+class _FakeBlobs:
+    def __init__(self, names):
+        self.names = set(names)
+
+    def list_blobs(self, name_starts_with=""):
+        from types import SimpleNamespace
+        return [SimpleNamespace(name=n) for n in sorted(self.names) if n.startswith(name_starts_with)]
+
+    def delete_blob(self, name):
+        self.names.remove(name)
+
+
+class _FakeTable:
+    def __init__(self, rows):
+        self.rows = rows
+
+    def query_entities(self, flt):
+        key, val = flt.split(" eq ")
+        return [r for r in self.rows if r[key] == val.strip("'")]
+
+    def delete_entity(self, pk, rk):
+        self.rows = [r for r in self.rows if (r["PartitionKey"], r["RowKey"]) != (pk, rk)]
+
+
+def test_delete_sample_local_and_azure(tmp_path):
+    for sid in ("sample_001", "sample_002"):
+        (tmp_path / sid).mkdir()
+        (tmp_path / sid / "signal.csv").write_text("t_s,value,label\n")
+    blobs = _FakeBlobs(["sample_001/metadata.json", "sample_001/000000.csv", "sample_002/000000.csv"])
+    samples = _FakeTable([{"PartitionKey": "sample", "RowKey": "sample_001"},
+                          {"PartitionKey": "sample", "RowKey": "sample_002"}])
+    preds = _FakeTable([{"PartitionKey": "sample_001", "RowKey": "000000"},
+                        {"PartitionKey": "sample_001", "RowKey": "000001"},
+                        {"PartitionKey": "sample_002", "RowKey": "000000"}])
+    done = delete_sample("sample_001", root=tmp_path, clients=(blobs, samples, preds))
+    assert done == {"local": 1, "blobs": 2, "sample_rows": 1, "prediction_rows": 2}
+    assert not (tmp_path / "sample_001").exists() and (tmp_path / "sample_002").exists()
+    assert blobs.names == {"sample_002/000000.csv"}
+    assert [r["RowKey"] for r in samples.rows] == ["sample_002"] and len(preds.rows) == 1
+
+
+def test_delete_sample_offline_and_bad_id(tmp_path):
+    (tmp_path / "sample_003").mkdir()
+    assert delete_sample("sample_003", root=tmp_path, conn_str="")["local"] == 1
+    with pytest.raises(ValueError):
+        delete_sample("../etc", root=tmp_path, conn_str="")
 
 
 # --- files downloaded by the web interface (scripts/import_web.py) ---

@@ -160,6 +160,40 @@ def _clients(conn_str: str):
             tables.create_table_if_not_exists(config.TABLE_PREDICTIONS))
 
 
+def delete_sample(sample_id: str, root: Path = config.DATA_RAW, conn_str: str | None = None,
+                  clients=None) -> dict:
+    """Deletes one sample everywhere (privacy: right to withdraw, see docs/privacy.md).
+
+    Local folder root/<sample_id>, blobs signals/<sample_id>/*, the `samples` row and all `predictions`
+    rows of that sample. Returns counts. Git history is NOT touched (see docs/privacy.md).
+    """
+    if not SAMPLE_RE.match(sample_id):
+        raise ValueError("sample_id must look like sample_001")
+    import shutil
+    done = {"local": 0, "blobs": 0, "sample_rows": 0, "prediction_rows": 0}
+    local = Path(root) / sample_id
+    if local.is_dir():
+        shutil.rmtree(local)
+        done["local"] = 1
+    conn_str = conn_str if conn_str is not None else os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+    if clients is None:
+        if not conn_str:
+            log.warning("No AZURE_STORAGE_CONNECTION_STRING - deleted locally only.")
+            return done
+        clients = _clients(conn_str)
+    blobs, samples, preds = clients
+    for b in list(blobs.list_blobs(name_starts_with=f"{sample_id}/")):
+        blobs.delete_blob(b.name)
+        done["blobs"] += 1
+    for e in list(samples.query_entities(f"RowKey eq '{sample_id}'")):
+        samples.delete_entity(e["PartitionKey"], e["RowKey"])
+        done["sample_rows"] += 1
+    for e in list(preds.query_entities(f"PartitionKey eq '{sample_id}'")):
+        preds.delete_entity(e["PartitionKey"], e["RowKey"])
+        done["prediction_rows"] += 1
+    return done
+
+
 def upload_sample(sample_dir: Path, conn_str: str | None = None) -> None:
     """Upload a finished local sample afterwards (e.g. it was recorded offline)."""
     df, meta = load_sample(sample_dir)

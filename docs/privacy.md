@@ -18,7 +18,8 @@ The course also asks: research prototype or medical product? (COFEPRIS). Ours is
 - Free text (`notes`, `placement_notes`): only technical notes, never names or anything identifying.
 - Azure: EU region only, Storage Account not public (no anonymous blob access), keys only in `.env` / App settings.
 - The GitHub repo stays **private**.
-- Deleting data on request: delete `data/raw/<sample_id>` (via PR), the blob folder `signals/<sample_id>/`,
+- Deleting data on request: `python scripts/delete_sample.py sample_007` deletes the local folder, the blobs and the
+  table rows in one go. Then remove `data/raw/sample_007` from the repo via PR. What it deletes: delete `data/raw/<sample_id>` (via PR), the blob folder `signals/<sample_id>/`,
   and the table rows with `PartitionKey = <sample_id>` / `RowKey = <sample_id>`. Note: the sample stays in the Git
   history; if a full erasure is ever needed, the history has to be rewritten. That's one more reason to keep the repo private.
 
