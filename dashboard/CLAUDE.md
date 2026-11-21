@@ -20,6 +20,8 @@ agreement % per sample. `STEPS` is a copy of `config.SAMPLE_STEPS` (self-contain
 `streamlit run dashboard/app.py` → http://localhost:8501
 
 ## Deploy (details in docs/azure_setup.md)
-From inside `dashboard/`: `az webapp up --name semgia-dashboard --runtime PYTHON:3.12 --sku B1 --location westeurope`
+Live (free F1 plan, first load ~1 min): https://semgia-dashboard-bossvl.azurewebsites.net
+`az webapp up` is deprecated → redeploy = zip `app.py` + `requirements.txt` and `az webapp deploy` (exact commands in the guide).
+No paid plans (team choice).
 Startup command: `python -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0`
 App setting: `AZURE_STORAGE_CONNECTION_STRING`. Turn on Web sockets.
