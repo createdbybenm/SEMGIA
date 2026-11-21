@@ -21,21 +21,20 @@
 Test: `python scripts/record.py --source mock` → Collect sample → Storage browser should show `signals/sample_NNN/...`.
 
 ## 3. App Service (dashboard)
-Requires the Azure CLI (`az login`):
+Requires the Azure CLI (`az login --use-device-code`). `az webapp up` no longer works (deprecated), so it is 4 steps.
+We use the **free F1** plan (no cost; slow, sleeps when idle → the first load can take ~1 min).
 ```
-cd dashboard
-az webapp up --name semgia-dashboard-<random> --resource-group rg-semgia \
-    --runtime PYTHON:3.12 --sku B1 --location belgiumcentral
-az webapp config set --name semgia-dashboard-<random> --resource-group rg-semgia --web-sockets-enabled true \
+az appservice plan create -n semgia-plan -g rg-semgia --sku F1 --is-linux -l belgiumcentral
+az webapp create -n semgia-dashboard-bossvl -g rg-semgia -p semgia-plan --runtime "PYTHON:3.12"
+az webapp config set -n semgia-dashboard-bossvl -g rg-semgia --web-sockets-enabled true \
     --startup-file "python -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0"
-az webapp config appsettings set --name semgia-dashboard-<random> --resource-group rg-semgia \
+az webapp config appsettings set -n semgia-dashboard-bossvl -g rg-semgia \
     --settings AZURE_STORAGE_CONNECTION_STRING="<connection string>" SCM_DO_BUILD_DURING_DEPLOYMENT=true
+cd dashboard && zip dashboard.zip app.py requirements.txt
+az webapp deploy -n semgia-dashboard-bossvl -g rg-semgia --src-path dashboard.zip --type zip
 ```
-Open `https://semgia-dashboard-<random>.azurewebsites.net`.
-To redeploy after changes, run `az webapp up` again from `dashboard/` (it remembers the settings).
-- B1 costs ~€12/month and is covered by the student credit. Stop the app when not needed
-  (`az webapp stop ...`). F1 (free) may work too, but it sleeps and is slow.
-- Optional: put the dashboard behind a login (App Service → Authentication → Microsoft).
+Open **https://semgia-dashboard-bossvl.azurewebsites.net**. To redeploy after changes: repeat the last two lines
+(don't commit `dashboard.zip`).
 
 ## 4. Done – checklist
 - [ ] all 4 have Contributor access

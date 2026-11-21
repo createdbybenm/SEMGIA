@@ -64,6 +64,8 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
   Storage `semgiadatabossvl` in **belgiumcentral** (westeurope is blocked by the student policy; belgiumcentral is the
   only allowed EU region). Tested: mock sample uploads live, offline sample uploads later, `scripts/delete_sample.py`.
   Connection string: ask CO privately, never in Git.
+- 2026-11-21 CO – **Dashboard online (free F1 plan)**: https://semgia-dashboard-bossvl.azurewebsites.net
+  (first load ~1 min, it sleeps). Budget `semgia-budget` 10/month, alert at 80%. No paid plans (team choice).
 - **Report 1 due Sat 2026-11-21 23:59.** Done: README (six parts + team table), PROTOCOL.md (method + filter table),
   DECISIONS.md 7–9, data/raw + metadata.csv + QUALITY-REPORT, rationale/M02, ai-tools/M02, tags, professor invited.
   Missing: cue video (`cue/`), one electrode photo per session (`figures/`), rationale + ai-tools + PROTOCOL agreement
