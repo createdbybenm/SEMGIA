@@ -2,7 +2,10 @@
 
 ## 1. Subscription & resource group
 1. Activate **Azure for Students** (https://azure.microsoft.com/free/students, no credit card needed).
-2. Portal → Resource groups → Create: `rg-semgia`, region **West Europe** (or Germany West Central).
+2. Portal → Resource groups → Create: `rg-semgia`, region **West Europe**.
+   Azure for Students only allows a few regions for resources (policy "Allowed resource deployment regions":
+   chilecentral, westus2, belgiumcentral, canadacentral, brazilsouth). The only EU one is **belgiumcentral** → use it
+   for the Storage Account and the App Service (privacy: EU only). Our account: `semgiadatabossvl`.
 3. Resource group → Access control (IAM) → add the other 3 members as **Contributor**.
 4. Cost Management → Budgets → create a budget for `rg-semgia`: €10, with an e-mail alert at 80%.
 
@@ -22,7 +25,7 @@ Requires the Azure CLI (`az login`):
 ```
 cd dashboard
 az webapp up --name semgia-dashboard-<random> --resource-group rg-semgia \
-    --runtime PYTHON:3.12 --sku B1 --location westeurope
+    --runtime PYTHON:3.12 --sku B1 --location belgiumcentral
 az webapp config set --name semgia-dashboard-<random> --resource-group rg-semgia --web-sockets-enabled true \
     --startup-file "python -m streamlit run app.py --server.port 8000 --server.address 0.0.0.0"
 az webapp config appsettings set --name semgia-dashboard-<random> --resource-group rg-semgia \

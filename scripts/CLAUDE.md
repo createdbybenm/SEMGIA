@@ -11,6 +11,7 @@
 | `check_quality.py` | quality rule → `QUALITY-REPORT.md` (train/evaluate skip rejected samples) | `python scripts/check_quality.py` |
 | `first_look.py` | one PNG per sample → `figures/first_look/`: check TRIM_S and thresholds by eye | `python scripts/first_look.py --samples sample_001` |
 | `upload_sample.py` | push offline-recorded samples to Azure | `python scripts/upload_sample.py data/raw/sample_007` |
+| `delete_sample.py` | privacy: delete a sample locally + in Azure (blobs, table rows) | `python scripts/delete_sample.py sample_007` |
 
 ## record.py
 - **Backup/demo only.** The real recording happens in our web interface (separate repo). Keep record.py working and
