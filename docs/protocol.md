@@ -1,7 +1,7 @@
 # Recording protocol
 
-> For Report 1 this becomes the root `PROTOCOL.md` (owner P1): add the type, order, limits and source of every filter
-> (analog 60 Hz notch + software filters) and one "I read the method and I agree" line per member (own commit each).
+> Operator checklist. The method, the filter table and the members' agreement lines are in the root
+> [PROTOCOL.md](../PROTOCOL.md). Patient = P002 (`config.PATIENT_ID`), muscle = right hamstrings.
 
 **Goal:** ~100 samples = **10 electrode placements × 10 samples**, spread over ≥ 5 different days.
 One sample = 24 s (rest 8 s → contract 8 s → rest 8 s). One placement ≈ 10 min.

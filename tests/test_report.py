@@ -12,6 +12,7 @@ from semgia.report import (
     metadata_table,
     quality_markdown,
     quality_table,
+    reject_reason,
     split_of,
 )
 from semgia.storage import LocalWriter, make_metadata
@@ -59,6 +60,8 @@ def test_other_subject_is_rejected():
     assert check_subject({"subject_id": config.PATIENT_ID}) == ""
     other = "P999" if config.PATIENT_ID != "P999" else "P998"
     assert "other subject" in check_subject({"subject_id": other})
+    assert reject_reason(good_df(), {"subject_id": config.PATIENT_ID}) == ""
+    assert "other subject" in reject_reason(good_df(), {"subject_id": other})   # train/evaluate skip it too
 
 
 def test_split_uses_test_placements(monkeypatch):

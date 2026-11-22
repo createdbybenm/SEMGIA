@@ -29,12 +29,12 @@ TRIM_S = 1.5              # windows closer than this to a label change / the sta
 # The ONLY place that defines the test set. Fill with e.g. the last 2 placements once recorded
 # (["E05", "E06"]).
 # Choose features/models on the train placements only; score the test placements once, at the end.
-TEST_PLACEMENTS: list[str] = []
+TEST_PLACEMENTS: list[str] = ["E06"]   # last placement (2026-11-21); E01 = other subject
 PATIENT_ID = "P002"       # one person (course rule): other subjects are rejected in QUALITY-REPORT.md
 
 # --- Per-session setup for data/metadata.csv (not in metadata.json, same for every session so far) ---
-ELECTRODE_DISTANCE_CM = "TODO-P1"   # centre-to-centre distance of the two electrodes
-SKIN_PREPARATION = "TODO-P1"        # e.g. "alcohol wipe"
+ELECTRODE_DISTANCE_CM = "not recorded"   # SEN0240 dry electrodes are built into the board
+SKIN_PREPARATION = "not recorded"
 SENSOR_MODEL = "DFRobot Gravity Analog EMG SEN0240 (OYMotion)"  # PCB front end not working (2026-11-21)
 GAIN = "1000"                       # analog gain of the sensor board (SEN0240 datasheet)
 ADC_BITS = 12                       # ESP32: 12-bit ADC (0..4095)
