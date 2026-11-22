@@ -13,21 +13,21 @@ Source of truth: [report1_assignment.md](report1_assignment.md) (transcript of t
 | **2026-11-24** final class | Final delivery: live demo, test on 4 new placements, exam (from slides, see below) |
 
 ## Report 1 checklist → our repo
-Status as of 2026-11-19. The files must sit at the **repo root**, with exactly these names.
+Status as of 2026-11-21. The files must sit at the **repo root**, with exactly these names.
 
 | # | Required | Our status / source in repo | Owner |
 |---|---|---|---|
-| 1 | `README.md`: six parts (see below) + team table: member code, GitHub user, role, AI tool | README is a dev quickstart → **rewrite** (keep dev part lower down) | P4 |
-| 2 | `PROTOCOL.md`: method, **type, order and limits of every filter + source** (ours: analog band-pass 20–500 Hz + digital 60 Hz notch with harmonics, see architecture.md), 1 line per member "I read the method and I agree" (own commit each) | `docs/protocol.md` exists → move to root and extend | P1 |
-| 3 | `data/raw/`: **every** recording, untouched (train **and** test sessions) | `data/raw/sample_NNN/` folders, no data yet | P1 |
-| 4 | `data/metadata.csv`: one row per recording, columns below | `scripts/export_metadata.py` done (per-session constants TODO-P1 in config.py); run on real data | P2 |
-| 5 | `QUALITY-REPORT.md`: one row per recording + reason for each rejection | `scripts/check_quality.py` done (rule fixed, written before any score); run on real data | P2 |
-| 6 | `DECISIONS.md`: parts 7 Features, 8 Model, 9 Route (chose / reason in own words / not understood yet) | draft at root: 7 + 8 done (Ben rewrites reasons in own words), 9 open | P2 (7, 8), P3 (9) |
-| 7 | `rationale/Mxx.md`: ~100 words, own words, one group choice you support or doubt + why + 1 source | missing | **each member** |
-| 8 | `ai-tools/Mxx.png`: screenshot of your AI tool open on this project with one question | missing | **each member** |
+| 1 | `README.md`: six parts (see below) + team table: member code, GitHub user, role, AI tool | done (team table: M03/M04 rows to confirm) | P4 |
+| 2 | `PROTOCOL.md`: method, **type, order and limits of every filter + source** (ours: analog band-pass 20–500 Hz + digital 60 Hz notch with harmonics, see architecture.md), 1 line per member "I read the method and I agree" (own commit each) | done at root; agreement lines: M02 on main, M01 in PR #12, M03/M04 missing | P1 |
+| 3 | `data/raw/`: **every** recording, untouched (train **and** test sessions) | done: 59 recordings, E01–E06 (2026-11-21) | P1 |
+| 4 | `data/metadata.csv`: one row per recording, columns below | done (distance + skin preparation = "not recorded") | P2 |
+| 5 | `QUALITY-REPORT.md`: one row per recording + reason for each rejection | done: 26 of 59 rejected | P2 |
+| 6 | `DECISIONS.md`: parts 7 Features, 8 Model, 9 Route (chose / reason in own words / not understood yet) | done (7, 8, 9) | P2 (7, 8), P3 (9) |
+| 7 | `rationale/Mxx.md`: ~100 words, own words, one group choice you support or doubt + why + 1 source | M02 done; M01, M03, M04 missing | **each member** |
+| 8 | `ai-tools/Mxx.png`: screenshot of your AI tool open on this project with one question | M02 done, M01 in PR #12; M03, M04 missing | **each member** |
 | 9 | cue video (e.g. `cue/cue-video.mp4`, screen recording of our REST/CONTRACT cues) | missing | P1 / P4 |
 | 10 | one electrode photo **per session**, no faces (e.g. `figures/placement_S01.jpg`) | missing (old rule "photos not in Git" is obsolete) | P1 |
-| 11 | tags `v0-first` and `v1-report`; ≥ 1 commit per member; professor added as collaborator | none yet | P4 |
+| 11 | tags `v0-first` and `v1-report`; ≥ 1 commit per member; professor added as collaborator | tags done; professor invited (pending); commits: M01, M02, M03 yes, M04 not yet | P4 |
 
 ### The six README parts (write numbers, not adjectives; end each with "Evidence: <files/columns>")
 1 Data acquisition (recordings, trials, sessions, persons, electrodes, distance, muscle, Fs) · 2 Task (movement, 2 classes,
@@ -84,4 +84,3 @@ Also: norms (research vs. medical product, COFEPRIS), consent signed before the 
   keep the dashboard in Azure and use Colab for documentation.
 - Slides: "test data only in Azure", PDF: every recording in `data/raw/` → we follow the PDF for Report 1.
 - Do we need a warning cue (`warning_s`)? Current protocol has none (0 s).
-- Professor's GitHub user (to add as collaborator).
