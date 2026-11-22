@@ -112,10 +112,9 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - Colab project notebook: one for the group, or one per member + one group? (ask the professor)
 - Warning cue before the contraction (`warning_s`)? Currently 0 s.
 - Professor's GitHub user, to add as collaborator. Member codes M01–M04: who is who?
-- Raw output or envelope from the sensor? → decides RAW_SIGNAL.
 - FS = 1000 Hz on the ESP32? HamShot_EMG samples at 1 kHz with a FreeRTOS 1 ms task – confirm on hardware (P1).
-- Which muscle? (default: biceps brachii right)
-- The consent form MUST allow storing data on GitHub (Report 1 requires every recording in `data/raw/`). Check the wording.
+- 2026-11-21 CO – Consent form written: `docs/consent_form.md` (paper only, covers GitHub + Azure EU storage). Signed copies stay on paper.
+- 2026-11-21 CO – Sensor gives the raw signal (not an envelope) → `RAW_SIGNAL = True`. Muscle = right hamstrings.
 - Is TRIM_S = 1.5 s right? Check on real train data with `scripts/first_look.py` (literature: onset ≈ 0.33 s after cue).
 - Per-session values for metadata.csv (P1): electrode distance, skin preparation, sensor model, gain
   (`config.py`, now "TODO-P1").
