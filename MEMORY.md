@@ -4,6 +4,10 @@ One line per entry, newest first within a section, always dated (YYYY-MM-DD) + i
 Add entries in the same PR as the change. Delete lines that are no longer true. Keep it < 150 lines.
 
 ## Decisions
+- 2026-11-21 BM – PROTOCOL.md lists the digital 60 Hz notch as filter 2 (course: type, order, limits of EVERY filter).
+  `data/raw/` stays unfiltered; notch + window-mean removal run in code (`Filter`, `features`).
+- 2026-11-21 BM – Model still open: on train LOPO logreg and LDA tie (0.90 clean / 0.85 all), forest 0.88 / 0.83.
+  Pick the best on train only, then `evaluate.py --final` once on E06.
 - 2026-11-21 BM – `notebooks/` folder removed: no notebooks in the repo for now. The course's Colab project notebook
   (final delivery) is still open, see Open questions.
 - 2026-11-21 BM – **Digital 60 Hz notch + harmonics in `processing.Filter`** (`NOTCH_HZ`, `NOTCH_Q`; causal, with state).
@@ -20,11 +24,13 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
   `Smoother` on top. Imbalance (rest 16 s : contract 8 s) via class weights / LDA equal priors, no resampling.
   Chosen from `docs/report/model_research.md`. List = `ML_KINDS` in `semgia/model.py`. Final pick on real train data.
 - 2026-11-19 BM – **`TEST_PLACEMENTS` in `config.py` is the only test-set definition** (feeds `set` in metadata.csv,
-  evaluate, train). Still empty → P1 picks the last placements once recorded.
+  evaluate, train). Set to `["E06"]` on 2026-11-21 (last placement).
 - 2026-11-19 BM – **The course assignment is in `docs/course/`.** The Report 1 PDF is authoritative; slides/videos are
   background. Checklist + owners: `docs/course/requirements.md`. Build only what serves it.
 - 2026-11-19 BM – **Every recording (train AND test sessions) stays in `data/raw/`**, marked `set = train|test` in
   `data/metadata.csv` (the PDF; the slides said "test only in Azure", PDF wins). Choose on train only, test once at the end.
+- 2026-11-21 BM – Real data answers: sensor gives the **raw** signal (`RAW_SIGNAL = True`); FS = 1000 Hz confirmed (hum
+  peak exactly at 60.0 Hz); muscle = right hamstrings.
 - 2026-11-19 BM – Microcontroller = **ESP32**, 12-bit ADC (0..4095), `ADC_BITS = 12`.
 - 2026-11-19 BM – Dashboard stays in the cloud (Azure). Colab = course documentation / project notebook (split still open).
 - 2026-11-19 BM – Team skills in `.claude/skills/`: /gitup, /calib, /docit, /audit. Edit them via PR like code.
@@ -62,10 +68,12 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - 2026-11-03 – Pseudonyms P001 / OP01. Name list only on paper. EU Azure region. Repo stays private (also: course material in docs/course is students-only).
 
 ## Current status (2026-11-21)
-- **Report 1 due Sat 2026-11-21 23:59.** Done: README (six parts + team table), PROTOCOL.md (method + filter table),
-  DECISIONS.md 7–9, data/raw + metadata.csv + QUALITY-REPORT, rationale/M02, ai-tools/M02, tags, professor invited.
-  Missing: cue video (`cue/`), one electrode photo per session (`figures/`), rationale + ai-tools + PROTOCOL agreement
-  line of M01, M03, M04 (own commits). Team table GitHub user ↔ role is inferred from commits → each member checks.
+- **Report 1 (due 2026-11-21 23:59):** on main: README (six parts + team table), PROTOCOL.md, DECISIONS.md 7–9,
+  data/raw + metadata.csv + QUALITY-REPORT, rationale/M02, ai-tools/M02, tags `v0-first` (56d499c) + `v1-report`
+  (d68e075), professor invited (MahdiTec + Aeinehvand, pending). Open: PR #12 (M01 screenshot + agreement line),
+  cue video (`cue/`), electrode photo per session (`figures/`), rationale/ai-tools/agreement of M03, M04, own
+  rationale of M01. Team table: M01 = Silver0-sys confirmed (PR #12); M03/M04 rows inferred → those members check.
+  Files added after d68e075 → move the tag: `git tag -f v1-report && git push -f origin v1-report`.
 - 2026-11-21 BM – metadata.csv: `electrode_distance_cm` + `skin_preparation` = "not recorded" (SEN0240 built-in dry
   electrodes, nothing written down). Posture of the person was not recorded either.
 - **Real data in Git (2026-11-21):** `data/raw/sample_001–059`, E01–E06 (E01 = P001, other subject). `data/metadata.csv`
@@ -73,15 +81,15 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
   Import fixes (`--set`): muscle=hamstrings for all; effort=strong for E02 (sample_010–019, user: round 2 was all
   strong); condition fresh for sample_019 (typed "fewah"). effort/condition elsewhere = as typed, partly unreliable.
   Calibration files (`semgia-calib-2`) not imported yet → after PR #8. E01 false starts 223604Z/223632Z = drop.
-- AI on real train data (LOPO E02–E05, `docs/report/results_train.md`): logreg 0.90 clean / 0.85 all windows,
-  threshold floor 0.80 / 0.78, chance 0.67. Test (E06) not opened yet.
+- AI on real train data (LOPO E02–E05, `docs/report/results_train.md`): logreg 0.90 / 0.85, LDA 0.90 / 0.85,
+  forest 0.88 / 0.83 (clean / all windows); threshold floor 0.80 / 0.78, chance 0.67. Test (E06) not opened yet.
+  Not run yet: `first_look.py` (TRIM_S / threshold check), `train.py` (no `models/model.joblib`).
 - Repo scaffold merged: pipeline, tests, CI, docs, mock data, Python recording GUI, dashboard (local mode).
 - **Calibration in code is still per-sample** (`processing.sample_dataset` uses the sample's first rest phase).
   Per-placement calibration: file format now known (`data/raw/calibration_EXX/`, data/CLAUDE.md). Change point: `sample_calibration`.
-- Recording: web page (`firmware/HamShot_EMG/`) adapted (2026-11-20): calibration + "Tomar muestra" + 24 s cues + downloads
-  → `import_web.py`. Tested in a browser against a mock ESP32 + compiled; NOT yet run on the real boards.
-- Hardware: real acquisition about to start. `firmware/emg_serial/emg_serial.ino` is written for an Arduino Uno (0..1023), not the ESP32.
-- Azure: not set up yet. Upload + dashboard code tested offline / local mode only.
+- Recording: the 2026-11-21 data came from the standalone page of PR #8 (`firmware/semgia_emg/`, `semgia-calib-2`,
+  still open). `firmware/HamShot_EMG/` on main is the older version. SEN0240 on the ESP32, real boards work.
+- Azure: setup in PR #10 (P3, open). On main the upload + dashboard are tested offline / local mode only.
 
 ## Known problems / gotchas
 - 2026-11-21 – "Calibrar colocación" needs the catapult station board (it runs the rest/max sequence). Without it only
@@ -107,14 +115,10 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 ## Open questions
 - Colab project notebook: one for the group, or one per member + one group? (ask the professor)
 - Warning cue before the contraction (`warning_s`)? Currently 0 s.
-- Professor's GitHub user, to add as collaborator. Member codes M01–M04: who is who?
-- Raw output or envelope from the sensor? → decides RAW_SIGNAL.
-- FS = 1000 Hz on the ESP32? HamShot_EMG samples at 1 kHz with a FreeRTOS 1 ms task – confirm on hardware (P1).
-- Which muscle? (default: biceps brachii right)
+- Team table rows M03 / M04 (GitHub user ↔ role) – inferred from commits, members confirm.
+- Posture of the person during recording (README part 2) – not written down yet (P1).
 - The consent form MUST allow storing data on GitHub (Report 1 requires every recording in `data/raw/`). Check the wording.
 - Is TRIM_S = 1.5 s right? Check on real train data with `scripts/first_look.py` (literature: onset ≈ 0.33 s after cue).
-- Per-session values for metadata.csv (P1): electrode distance, skin preparation, sensor model, gain
-  (`config.py`, now "TODO-P1").
 
 ## Glossary
 - **sEMG** surface electromyography · **RMS** root mean square · **MAV** mean absolute value
@@ -124,3 +128,5 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - **Session** (course word) = one electrode placement = our `placement_id` · **Trial** = 1 cue-action-rest cycle = 1 sample for us
 - **Calibration** = rest + max contraction once per placement → scales signals to 0 (rest) … 1 (max)
 - **Clean window** = 200 ms window ≥ 1.5 s away from a label change
+- **Rest normalization** = each feature divided by the recording's rest level (1.0 = like rest); code: `Calibration`
+- **Leave-one-session-out** = train on 3 train sessions, score on the 4th, rotate; the average picks the model
