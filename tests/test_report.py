@@ -7,6 +7,7 @@ from semgia.report import (
     COURSE_COLUMNS,
     OWN_COLUMNS,
     check_signal,
+    check_subject,
     metadata_row,
     metadata_table,
     quality_markdown,
@@ -15,7 +16,7 @@ from semgia.report import (
 )
 from semgia.storage import LocalWriter, make_metadata
 
-IDS = dict(subject_id="P001", operator_id="OP01", placement_id="E01")
+IDS = dict(subject_id=config.PATIENT_ID, operator_id="OP01", placement_id="E01")
 
 
 def good_df(n: int = SAMPLE_N) -> pd.DataFrame:
@@ -51,6 +52,13 @@ def test_missing_rows_are_rejected():
 def test_length_tolerance_is_2_percent():
     assert check_signal(good_df(int(SAMPLE_N * 0.99))) == ""      # 1 % short -> ok
     assert "length" in check_signal(good_df(int(SAMPLE_N * 0.97)))  # 3 % short -> rejected
+
+
+def test_other_subject_is_rejected():
+    """One person only: samples of anyone but config.PATIENT_ID are rejected, the patient passes."""
+    assert check_subject({"subject_id": config.PATIENT_ID}) == ""
+    other = "P999" if config.PATIENT_ID != "P999" else "P998"
+    assert "other subject" in check_subject({"subject_id": other})
 
 
 def test_split_uses_test_placements(monkeypatch):

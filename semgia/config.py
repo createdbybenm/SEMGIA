@@ -6,8 +6,10 @@ from pathlib import Path
 FS = 1000                 # sampling rate in Hz (must match firmware)
 RAW_SIGNAL = True         # False if the sensor outputs an envelope (e.g. MyoWare ENV pin)
 ADC_MID = 2048            # ESP32 mid-scale: where a raw signal sits at rest (only used by MockSource)
-# Filtering is analog (20-447 Hz band-pass + 60 Hz notch), no digital filter (Ben 2026-11-19).
-# Software only subtracts each window's mean in processing.features (ESP32 offset ~2048).
+# Digital notch (processing.Filter): real data 2026-11-21 was 50-99 % mains hum at rest (60 Hz + harmonics),
+# the sensor has no working notch. Software also subtracts each window's mean in processing.features.
+NOTCH_HZ = 60.0           # Mexico mains; every multiple below FS/2 is notched too (60, 120, ... 480 Hz)
+NOTCH_Q = 30.0            # quality factor: -3 dB width = NOTCH_HZ / NOTCH_Q = 2 Hz per notch
 
 # --- Windowing ---
 WINDOW_S = 0.200          # 200 ms windows
@@ -28,6 +30,7 @@ TRIM_S = 1.5              # windows closer than this to a label change / the sta
 # (["E05", "E06"]).
 # Choose features/models on the train placements only; score the test placements once, at the end.
 TEST_PLACEMENTS: list[str] = []
+PATIENT_ID = "P002"       # one person (course rule): other subjects are rejected in QUALITY-REPORT.md
 
 # --- Per-session setup for data/metadata.csv (not in metadata.json, same for every session so far) ---
 ELECTRODE_DISTANCE_CM = "TODO-P1"   # centre-to-centre distance of the two electrodes
@@ -47,7 +50,8 @@ THRESHOLD_OFF = 2.0       # RMS < 2x rest -> rest (hysteresis)
 SMOOTH_N = 5              # majority vote over the last N predictions
 
 # --- Metadata choices (dropdowns in the recording app) ---
-MUSCLES = ["biceps brachii", "triceps brachii", "flexor carpi radialis", "tibialis anterior", "other"]
+MUSCLES = ["biceps brachii", "triceps brachii", "flexor carpi radialis", "tibialis anterior", "hamstrings",
+           "other"]
 SIDES = ["right", "left"]
 EFFORTS = ["light", "medium", "strong"]
 CONDITIONS = ["fresh", "fatigued"]

@@ -23,7 +23,7 @@ signal.csv columns: t_s,value,label
 
 ## How a sample becomes training data (`sample_dataset`)
 1. Whole 24 s signal → 200 ms windows every 100 ms → subtract window mean (ESP32 offset) → 4 features per window.
-   No digital filter (analog front end does 20–447 Hz + 60 Hz notch); `Filter` is a pass-through.
+   Before that, `Filter` notches 60 Hz + harmonics (causal, with state; the sensor has no notch).
 2. Baseline = median features of the clean windows in the first rest phase → divide all features by it.
 3. `clean_mask`: keep windows ≥ `TRIM_S` from every label change and from start/end → middle 5 s of each phase.
 4. Label of a window = the timer label (from the CSV). `clean_only=False` gives every window (for realistic testing).
@@ -36,7 +36,7 @@ and `evaluate.py` should also report results without calibration. Wait for the w
 
 ## Rules
 - `processing.py` is used live AND offline: chunked processing == whole-signal processing (there's a test for this).
-  If a digital filter is ever added back to `Filter`, keep it causal with state (`sosfilt` + `zi`).
+  `Filter` must stay causal with state (`sosfilt` + `zi`), one instance per recording.
 - `features` subtracts the window mean only for raw EMG (`RAW_SIGNAL = True`); for an envelope it would erase a
   sustained contraction.
 - Models always get **normalized** features (÷ rest baseline). Never raw amplitudes.

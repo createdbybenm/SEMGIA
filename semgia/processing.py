@@ -1,12 +1,13 @@
-"""Windowing, features, clean-window selection and rest-baseline calibration (no digital filter).
+"""Mains notch filter, windowing, features, clean-window selection and rest-baseline calibration.
 
-The live app and the offline scripts use exactly the same classes (Filter pass-through +
-Windower + features), so features are identical in both.
+The live app and the offline scripts use exactly the same classes (Filter + Windower + features),
+so features are identical in both.
 """
 
 from dataclasses import dataclass
 
 import numpy as np
+from scipy import signal
 
 from semgia import config
 
@@ -14,13 +15,26 @@ FEATURE_NAMES = ["rms", "mav", "wl", "zc"]
 
 
 class Filter:
-    """No digital filter: the analog front end already band-passes (20-447 Hz) and notches 60 Hz
-    (Ben, 2026-11-19). This pass-through only keeps one interface for live and offline code,
-    so a digital filter could be added back in one place if real data ever needs it.
+    """Causal notch at config.NOTCH_HZ and every multiple below FS/2 (mains hum + harmonics).
+
+    Real data (2026-11-21) was 50-99 % 60 Hz hum at rest; the sensor has no working notch.
+    The filter keeps its state between process() calls, so a live stream cut into chunks gives
+    exactly the same output as the whole recording at once. Use one Filter per recording.
     """
 
+    def __init__(self, fs: int = config.FS, f0: float = config.NOTCH_HZ, q: float = config.NOTCH_Q):
+        freqs = np.arange(f0, fs / 2, f0)
+        self.sos = np.vstack([signal.tf2sos(*signal.iirnotch(f, q, fs=fs)) for f in freqs])
+        self.zi = None
+
     def process(self, x: np.ndarray) -> np.ndarray:
-        return np.asarray(x, dtype=float)
+        x = np.asarray(x, dtype=float)
+        if len(x) == 0:
+            return x
+        if self.zi is None:     # start in steady state at the first value -> no jump from the ADC offset
+            self.zi = signal.sosfilt_zi(self.sos) * x[0]
+        y, self.zi = signal.sosfilt(self.sos, x, zi=self.zi)
+        return y
 
 
 class Windower:
