@@ -4,6 +4,8 @@ One line per entry, newest first within a section, always dated (YYYY-MM-DD) + i
 Add entries in the same PR as the change. Delete lines that are no longer true. Keep it < 150 lines.
 
 ## Decisions
+- 2026-11-21 BM – `notebooks/` folder removed: no notebooks in the repo for now. The course's Colab project notebook
+  (final delivery) is still open, see Open questions.
 - 2026-11-21 BM – **Digital 60 Hz notch + harmonics in `processing.Filter`** (`NOTCH_HZ`, `NOTCH_Q`; causal, with state).
   The real data is 50–99 % mains hum at rest, the SEN0240 has no notch. Replaces "no digital filter" (2026-11-19).
 - 2026-11-21 BM – **Patient = P002** (`config.PATIENT_ID`). Round 1 (E01) was another person (P001): imported (every

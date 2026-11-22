@@ -15,7 +15,7 @@ Show the user each command you run. Stop and ask on anything unexpected (conflic
 | Person | Owns |
 |---|---|
 | P1 Hardware & recordings | `firmware/`, `semgia/sources.py`, `docs/protocol.md` / `PROTOCOL.md`, `data/raw/`, `figures/`, `cue/` |
-| P2 AI (Ben) | `semgia/processing.py`, `semgia/model.py`, `scripts/train.py`, `scripts/evaluate.py`, `notebooks/`, `DECISIONS.md` 7–8, `QUALITY-REPORT.md`, `data/metadata.csv` scripts |
+| P2 AI (Ben) | `semgia/processing.py`, `semgia/model.py`, `scripts/train.py`, `scripts/evaluate.py`, `DECISIONS.md` 7–8, `QUALITY-REPORT.md`, `data/metadata.csv` scripts |
 | P3 Azure & privacy | `semgia/storage.py`, `docs/azure_setup.md`, `docs/privacy.md`, dashboard deployment, `DECISIONS.md` 9 |
 | P4 Interface & dashboard | `scripts/record.py`, `semgia/recorder.py`, `dashboard/app.py`, `README.md`, CI, tags |
 | Everyone | own `rationale/Mxx.md`, `ai-tools/Mxx.png`, own line in PROTOCOL.md, `MEMORY.md` lines |
