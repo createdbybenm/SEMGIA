@@ -4,6 +4,8 @@ One line per entry, newest first within a section, always dated (YYYY-MM-DD) + i
 Add entries in the same PR as the change. Delete lines that are no longer true. Keep it < 150 lines.
 
 ## Decisions
+- 2026-11-21 CO – Consent form written: `docs/consent_form.docx` (print, fill blanks by hand, sign on paper; covers GitHub + Azure EU storage; one per person: P001 for E01, P002 for E02–E06). Signed copies stay on paper.
+- 2026-11-21 CO – Sensor gives the raw signal (not an envelope) → `RAW_SIGNAL = True`. Muscle = right hamstrings.
 - 2026-11-21 BM – PROTOCOL.md lists the digital 60 Hz notch as filter 2 (course: type, order, limits of EVERY filter).
   `data/raw/` stays unfiltered; notch + window-mean removal run in code (`Filter`, `features`).
 - 2026-11-21 BM – Model still open: on train LOPO logreg and LDA tie (0.90 clean / 0.85 all), forest 0.88 / 0.83.
@@ -68,11 +70,17 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - 2026-11-03 – Pseudonyms P001 / OP01. Name list only on paper. EU Azure region. Repo stays private (also: course material in docs/course is students-only).
 
 ## Current status (2026-11-21)
+- 2026-11-20 CO – **Azure is set up** (subscription "Azure for Students", not "ITESM - LabVirtual"): `rg-semgia`,
+  Storage `semgiadatabossvl` in **belgiumcentral** (westeurope is blocked by the student policy; belgiumcentral is the
+  only allowed EU region). Tested: mock sample uploads live, offline sample uploads later, `scripts/delete_sample.py`.
+  Connection string: ask CO privately, never in Git.
+- 2026-11-21 CO – **Dashboard online (free F1 plan)**: https://semgia-dashboard-bossvl.azurewebsites.net
+  (first load ~1 min, it sleeps). Budget `semgia-budget` 10/month, alert at 80%. No paid plans (team choice).
 - **Report 1 (due 2026-11-21 23:59):** on main: README (six parts + team table), PROTOCOL.md, DECISIONS.md 7–9,
   data/raw + metadata.csv + QUALITY-REPORT, rationale/M02, ai-tools/M02, tags `v0-first` (56d499c) + `v1-report`
   (d68e075), professor invited (MahdiTec + Aeinehvand, pending). Open: PR #12 (M01 screenshot + agreement line),
-  cue video (`cue/`), electrode photo per session (`figures/`), rationale/ai-tools/agreement of M03, M04, own
-  rationale of M01. Team table: M01 = Silver0-sys confirmed (PR #12); M03/M04 rows inferred → those members check.
+  cue video (`cue/`), electrode photo per session (`figures/`), rationale/ai-tools/agreement of M04, ai-tools of M03, own
+  rationale of M01. Team table: M01 = Silver0-sys confirmed (PR #12); M03 = CarlosOVa confirmed (does the P1 hardware/recording work, 2026-11-21); M04 row inferred → check.
   Files added after d68e075 → move the tag: `git tag -f v1-report && git push -f origin v1-report`.
 - 2026-11-21 BM – metadata.csv: `electrode_distance_cm` + `skin_preparation` = "not recorded" (SEN0240 built-in dry
   electrodes, nothing written down). Posture of the person was not recorded either.
@@ -115,9 +123,8 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 ## Open questions
 - Colab project notebook: one for the group, or one per member + one group? (ask the professor)
 - Warning cue before the contraction (`warning_s`)? Currently 0 s.
-- Team table rows M03 / M04 (GitHub user ↔ role) – inferred from commits, members confirm.
+- Team table row M04 (GitHub user ↔ role) – inferred from commits, member confirms.
 - Posture of the person during recording (README part 2) – not written down yet (P1).
-- The consent form MUST allow storing data on GitHub (Report 1 requires every recording in `data/raw/`). Check the wording.
 - Is TRIM_S = 1.5 s right? Check on real train data with `scripts/first_look.py` (literature: onset ≈ 0.33 s after cue).
 
 ## Glossary

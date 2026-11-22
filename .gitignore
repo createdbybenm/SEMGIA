@@ -28,3 +28,7 @@ data/demo/
 firmware/**/build/
 *.bin
 *.elf
+
+# Signed consent forms contain real names: paper / private storage only, never in Git
+docs/consent_form_P*.pdf
+*consent*signed*

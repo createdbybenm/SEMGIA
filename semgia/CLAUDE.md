@@ -9,7 +9,7 @@
 | `evaluation.py` | fair split (`split_train_test`), `lopo_predictions`, `final_predictions`, scores, confusion, Markdown | AI |
 | `report.py` | `data/metadata.csv` rows (`metadata_table`), quality rule (`check_signal`) for `QUALITY-REPORT.md` | AI |
 | `recorder.py` | `label_at`, `LivePredictor`, `SampleRecorder` (live logic of the app, no GUI) | App |
-| `storage.py` | `make_metadata`, `next_sample_id`, `LocalWriter`, `AzureUploader`, `load_sample`, `upload_sample` | Azure |
+| `storage.py` | `make_metadata`, `next_sample_id`, `LocalWriter`, `AzureUploader`, `load_sample`, `upload_sample`, `delete_sample` | Azure |
 
 ## Frozen interfaces (team agreement needed to change them)
 ```python
