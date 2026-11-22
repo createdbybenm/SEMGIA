@@ -42,3 +42,8 @@ electrode placements. Model: threshold or logistic regression on RMS/MAV/WL/ZC o
 
 ## Team workflow
 Read [CONTRIBUTING.md](CONTRIBUTING.md). AI assistants: [CLAUDE.md](CLAUDE.md) + [MEMORY.md](MEMORY.md).
+
+## Team
+| Member code | GitHub user | Role | AI tool |
+|---|---|---|---|
+| Mxx | CarlosOVa | P3 Azure & data privacy | Claude Code (VS Code) |

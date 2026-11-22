@@ -54,7 +54,26 @@ Source: Kaufmann et al. 2010, Young et al. 2011, van den Goorbergh et al. 2022 (
 
 ## 9 Route
 
-(P3 writes this)
+**DRAFT – Carlos rewrites the reason and the "not understood" line in his own words.**
+
+What we chose: the model runs in our own Python software on the laptop (`scripts/record.py` / `import_web.py`
+replay the signal through the same filter, features and model as training). Each recording is saved locally first
+(`data/raw/sample_NNN/`), then uploaded to Microsoft Azure: the raw signal as blobs (container `signals`), the
+metadata as one row in the table `samples`, and the model output per 100 ms window in the table `predictions`.
+A small Streamlit dashboard on Azure App Service (free F1 plan) reads them back, like a doctor opening a patient
+record. Everything sits in the region belgiumcentral (EU), with no public access. Evidence: `semgia/storage.py`,
+`docs/azure_setup.md`, `figures/azure_record.png` (one saved record with its metadata).
+
+Why (reason): TODO Carlos, in your own words. Points you can use: the laptop already runs the whole
+pipeline, so we do not need to port the model to the ESP32 (no TinyML conversion, no second feature
+path that could behave differently); the local save means a lost Wi-Fi connection never loses a
+recording, and the upload is retried later (`scripts/upload_sample.py`); Azure for Students is free
+and the budget alert stops surprise costs; tables and blobs let us delete one sample everywhere
+(`scripts/delete_sample.py`) when a person asks.
+
+Not understood yet: TODO Carlos. Something you really do not understand yet, for example: whether the
+free F1 plan is fast enough to show the record during the live demo, or how we would run the model on
+the ESP32 if we had no laptop.
 
 ## Sources
 - Kaufmann P, Englehart K, Platzner M. Fluctuating EMG signals: investigating long-term effects of pattern
