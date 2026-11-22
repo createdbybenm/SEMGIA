@@ -15,7 +15,7 @@ from semgia import config  # noqa: E402
 from semgia.evaluation import split_train_test  # noqa: E402
 from semgia.model import ML_KINDS, MLModel  # noqa: E402
 from semgia.processing import sample_dataset  # noqa: E402
-from semgia.report import check_signal  # noqa: E402
+from semgia.report import reject_reason  # noqa: E402
 from semgia.storage import list_samples, load_sample  # noqa: E402
 
 
@@ -26,7 +26,7 @@ def load_all(data: Path) -> list[dict]:
     out = []
     for d in list_samples(data):
         df, meta = load_sample(d)
-        reason = check_signal(df)
+        reason = reject_reason(df, meta)
         if reason:
             print(f"skip {meta['sample_id']} (rejected: {reason})")
             continue

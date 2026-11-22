@@ -75,10 +75,14 @@ def check_subject(meta: dict) -> str:
     return f"other subject {subject} (project = one person, {config.PATIENT_ID})"
 
 
+def reject_reason(df: pd.DataFrame, meta: dict) -> str:
+    """The full rejection rule (signal + subject): "" if ok. Used by QUALITY-REPORT, train and evaluate."""
+    return "; ".join(r for r in (check_signal(df), check_subject(meta)) if r)
+
+
 def quality_row(df: pd.DataFrame, meta: dict) -> dict:
     """One row of QUALITY-REPORT.md."""
-    reasons = [r for r in (check_signal(df), check_subject(meta)) if r]
-    reason = "; ".join(reasons)
+    reason = reject_reason(df, meta)
     return {"sample": meta.get("sample_id", ""), "session": meta.get("placement_id", ""), "rows": len(df),
             "verdict": "rejected" if reason else "ok", "reason": reason}
 

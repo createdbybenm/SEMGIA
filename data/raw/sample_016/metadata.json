@@ -1,0 +1,16 @@
+{
+  "sample_id": "sample_016",
+  "placement_id": "E02",
+  "subject_id": "P002",
+  "operator_id": "OP01",
+  "muscle": "hamstrings",
+  "side": "right",
+  "sensor_id": "DFRobot-SEN0240",
+  "electrode_type": "dry (built-in)",
+  "placement_notes": "",
+  "effort": "strong",
+  "condition": "fresh",
+  "sampling_rate_hz": 1000,
+  "start_time_utc": "2026-11-21T23:09:09+00:00",
+  "notes": ""
+}
