@@ -31,7 +31,7 @@ Each item goes on its own branch + PR. Don't copy the professor's example (it ge
 
 ## Person 2 – AI (signal processing & models)
 **Owns:** `semgia/processing.py`, `semgia/model.py`, `semgia/evaluation.py`, `semgia/report.py`, `scripts/train.py`,
-`scripts/evaluate.py`, `scripts/first_look.py`, `scripts/export_metadata.py`, `scripts/check_quality.py`, `notebooks/`
+`scripts/evaluate.py`, `scripts/first_look.py`, `scripts/export_metadata.py`, `scripts/check_quality.py`
 
 1. ✅ **Now (no data needed):** `python scripts/make_mock_samples.py && python scripts/evaluate.py --data data/synthetic`.
    Read `processing.sample_dataset`. Understand clean windows + baseline.

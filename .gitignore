@@ -23,8 +23,6 @@ data/demo/
 .DS_Store
 *.swp
 
-# notebooks checkpoints
-.ipynb_checkpoints/
 
 # arduino build output
 firmware/**/build/
