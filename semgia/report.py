@@ -67,9 +67,18 @@ def check_signal(df: pd.DataFrame) -> str:
     return "; ".join(reasons)
 
 
+def check_subject(meta: dict) -> str:
+    """One person only (course rule): "" if the sample is from config.PATIENT_ID, else the reason."""
+    subject = meta.get("subject_id", "")
+    if subject == config.PATIENT_ID:
+        return ""
+    return f"other subject {subject} (project = one person, {config.PATIENT_ID})"
+
+
 def quality_row(df: pd.DataFrame, meta: dict) -> dict:
     """One row of QUALITY-REPORT.md."""
-    reason = check_signal(df)
+    reasons = [r for r in (check_signal(df), check_subject(meta)) if r]
+    reason = "; ".join(reasons)
     return {"sample": meta.get("sample_id", ""), "session": meta.get("placement_id", ""), "rows": len(df),
             "verdict": "rejected" if reason else "ok", "reason": reason}
 
@@ -104,6 +113,7 @@ def quality_markdown(table: pd.DataFrame) -> str:
         "A recording is rejected if any of these is true:",
         f"- a value sits at the ADC limit: 0 or {adc_max} ({config.ADC_BITS}-bit ADC) -> clipped signal",
         "- a value is missing (NaN) or a row is missing (gap in `t_s` larger than one sample)",
+        f"- it is not from the patient {config.PATIENT_ID} (one person, one muscle)",
         f"- its length is off by more than {config.MAX_LENGTH_DEVIATION:.0%} from {SAMPLE_N} rows "
         f"({SAMPLE_N // config.FS} s at {config.FS} Hz)",
         "",

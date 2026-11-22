@@ -4,6 +4,12 @@ One line per entry, newest first within a section, always dated (YYYY-MM-DD) + i
 Add entries in the same PR as the change. Delete lines that are no longer true. Keep it < 150 lines.
 
 ## Decisions
+- 2026-11-21 BM – **Digital 60 Hz notch + harmonics in `processing.Filter`** (`NOTCH_HZ`, `NOTCH_Q`; causal, with state).
+  The real data is 50–99 % mains hum at rest, the SEN0240 has no notch. Replaces "no digital filter" (2026-11-19).
+- 2026-11-21 BM – **Patient = P002** (`config.PATIENT_ID`). Round 1 (E01) was another person (P001): imported (every
+  recording stays) but rejected in QUALITY-REPORT ("other subject"). The final test on 11-24 must be on P002 too.
+- 2026-11-21 BM – Muscle = **hamstrings** (added to `MUSCLES`; the web form had no such choice → 'other' was typed).
+  Wrong form fields are fixed at import with `import_web.py --set KEY=VALUE`, never by editing data/raw.
 - 2026-11-21 – **ESP32 firmware + web page are in this repo: `firmware/HamShot_EMG/`** (was a local "separate repo").
   Only the EMG board; the catapult station sketch is NOT in the repo (not part of the assignment).
 - 2026-11-21 – Sensor now = **DFRobot Gravity Analog EMG SEN0240** (our PCB front end is not working): blue = signal →
@@ -17,8 +23,6 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
   background. Checklist + owners: `docs/course/requirements.md`. Build only what serves it.
 - 2026-11-19 BM – **Every recording (train AND test sessions) stays in `data/raw/`**, marked `set = train|test` in
   `data/metadata.csv` (the PDF; the slides said "test only in Azure", PDF wins). Choose on train only, test once at the end.
-- 2026-11-19 BM – No digital filter: analog front end = band-pass 20-447 Hz + 60 Hz notch; software only subtracts
-  each window's mean (ESP32 offset ~2048).
 - 2026-11-19 BM – Microcontroller = **ESP32**, 12-bit ADC (0..4095), `ADC_BITS = 12`.
 - 2026-11-19 BM – Dashboard stays in the cloud (Azure). Colab = course documentation / project notebook (split still open).
 - 2026-11-19 BM – Team skills in `.claude/skills/`: /gitup, /calib, /docit, /audit. Edit them via PR like code.
@@ -73,8 +77,9 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - 2026-11-21 – "Calibrar colocación" needs the catapult station board (it runs the rest/max sequence). Without it only
   "Tomar muestra" works (page warns "no calibration"); per-sample rest baseline still works in code.
 - 2026-11-21 – SEN0240 saturates at 3.0 V ≈ 3720 counts, not 4095 → `check_signal` won't flag that clipping. Look at the
-  plot. Its filters: 20–500 Hz, no 60 Hz notch stated (DFRobot does the notch in software) → filter decision above is for
-  the PCB, P1/P2 to recheck with real data.
+  plot. Its filters: 20–500 Hz, no 60 Hz notch → confirmed by the data, see the notch decision.
+- 2026-11-21 BM – Real data: the hum grows during each placement (dry electrodes lose contact) and pushes the signal
+  to 0 → 17 of 59 samples clipped. Before each sample: laptop on battery, strap tight, quiet live signal at rest.
 - 2026-11-20 – Demo fallback = `record.py --source file --file data/raw/sample_NNN/signal.csv`: replays a real
   sample, saves to `data/demo/` (gitignored), no upload. Dashboard `STEPS` must stay equal to `config.SAMPLE_STEPS`.
 - 2026-11-20 – Web recording: keep the page in the foreground during a sample. If the browser falls > 8 s behind

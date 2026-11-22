@@ -70,10 +70,14 @@ It is not fixed: evaluate.py compares the models below and real data decides (so
 - Rejected samples (`QUALITY-REPORT.md`, `scripts/check_quality.py`) are skipped by train + evaluate.
 
 ## Filters
-All filtering is **analog** (front end): band-pass 20–447 Hz + 60 Hz notch (Mexico mains). **No digital filter**
-(Ben, 2026-11-19); `processing.Filter` is a pass-through that only keeps one interface for live and offline code.
-Software removes the ESP32 offset (rest ≈ 2048 of 0..4095) by subtracting each window's mean in `features`
-(not for an envelope sensor, `RAW_SIGNAL = False`). Document the analog filters in PROTOCOL.md (P1).
+1. **Analog** (DFRobot SEN0240 board): band-pass 20–500 Hz, gain 1000. It has **no working 60 Hz notch**: the
+   first real data (2026-11-21) was 50–99 % mains hum at rest (60 Hz + 120/180/300 Hz).
+2. **Digital** (`processing.Filter`, Ben 2026-11-21): causal IIR notch (`scipy.signal.iirnotch`, Q = `NOTCH_Q` = 30,
+   2 Hz wide) at `NOTCH_HZ` = 60 Hz and every multiple below Fs/2 (60 … 480 Hz), 2nd order each, as cascaded
+   biquads (`sosfilt`). It keeps its state between chunks, so live = offline. With it, contractions are visible in
+   34 of 59 real samples (2 of 59 without).
+3. `features` subtracts each window's mean (ESP32 offset, rest ≈ 1648 counts with the SEN0240; not for an envelope
+   sensor, `RAW_SIGNAL = False`). Document all three in PROTOCOL.md (P1).
 
 ## File formats
 - `signal.csv`: `t_s,value,label` – one row per reading (24 000 rows).

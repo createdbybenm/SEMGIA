@@ -22,7 +22,8 @@ EFFORT_GAIN = {"light": 0.4, "medium": 0.7, "strong": 1.0}
 def make_sample(out: Path, placement: int, rng: np.random.Generator,
                 effort: str = "medium", condition: str = "fresh") -> Path:
     gain = rng.uniform(0.5, 2.0) * EFFORT_GAIN[effort]   # placement + effort change the amplitude
-    meta = make_metadata(root=out, subject_id="P000", operator_id="OP00", placement_id=f"E{placement:02d}",
+    meta = make_metadata(root=out, subject_id=config.PATIENT_ID, operator_id="OP00",
+                         placement_id=f"E{placement:02d}",
                          sensor_id="mock", effort=effort, condition=condition, notes="synthetic")
     shutil.rmtree(out / meta["sample_id"], ignore_errors=True)
     writer = LocalWriter(meta, out)

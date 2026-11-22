@@ -8,6 +8,10 @@ files that were already imported are skipped. Files are imported in recording or
     python scripts/import_web.py C:/Users/me/Downloads/semgia_sample_E01_20261120T101500Z.json
     python scripts/import_web.py some/folder --out data/raw
     python scripts/import_web.py --upload                # also send new samples to Azure (needs .env)
+    python scripts/import_web.py "round 02" --set muscle=hamstrings --set effort=strong   # fix form entries
+
+--set only changes the sample metadata typed into the web form (muscle, effort, condition, ...), never the
+signal, the IDs or the sampling rate. Write every fix you make into MEMORY.md.
 
 Each sample is replayed through the same pipeline as record.py, so it also gets predictions.csv.
 """
@@ -32,13 +36,30 @@ def find_files(paths: list[str]) -> list[Path]:
     return files
 
 
+FIXABLE = {"muscle", "side", "effort", "condition", "electrode_type", "sensor_id", "placement_notes", "notes"}
+
+
+def parse_fixes(items: list[str]) -> dict[str, str]:
+    """["muscle=hamstrings", ...] -> {"muscle": "hamstrings"}. Only form fields in FIXABLE."""
+    fixes = {}
+    for item in items:
+        key, sep, value = item.partition("=")
+        if not sep or key not in FIXABLE:
+            raise SystemExit(f"--set {item!r}: use KEY=VALUE with KEY in {sorted(FIXABLE)}")
+        fixes[key] = value
+    return fixes
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("paths", nargs="*", default=[str(Path.home() / "Downloads")],
                    help="files or folders (default: ~/Downloads)")
     p.add_argument("--out", default=str(config.DATA_RAW), help="where samples are saved")
     p.add_argument("--upload", action="store_true", help="also upload new samples to Azure (best effort)")
+    p.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
+                   help="overwrite a wrongly typed form field in every sample imported now (repeatable)")
     a = p.parse_args()
+    fixes = parse_fixes(a.set)
     # without --upload, "running offline" is intended -> only show real errors
     logging.basicConfig(level=logging.INFO if a.upload else logging.ERROR, format="%(levelname)s %(message)s")
     load_dotenv()
@@ -64,6 +85,7 @@ def main() -> int:
             if payload.get("format") == "semgia-calib-1":
                 out = save_web_calibration(payload, Path(a.out))
             else:
+                payload["metadata"].update(fixes)
                 out = save_web_sample(payload, Path(a.out), upload=a.upload)
         except (ValueError, KeyError) as e:
             print(f"ERROR {f.name}: {e}")

@@ -15,12 +15,25 @@ def test_windower_same_result_chunked_and_whole():
         assert e1 == e2 and np.allclose(w1, w2)
 
 
-def test_filter_is_pass_through():
-    """No digital filter (analog front end filters). Chunked == whole stays true."""
-    x = config.ADC_MID + np.random.default_rng(1).normal(size=3000)
+def test_filter_removes_mains_hum_and_keeps_emg():
+    """60 Hz + harmonics are notched, other EMG frequencies pass, chunked == whole (live == offline)."""
+    t = np.arange(4 * config.FS) / config.FS
+    hum = 500 * np.sin(2 * np.pi * config.NOTCH_HZ * t) + 200 * np.sin(2 * np.pi * 3 * config.NOTCH_HZ * t)
+    emg = 50 * np.sin(2 * np.pi * 90 * t)          # between two notches
+    late = slice(config.FS, None)                  # skip the first second (filter settling)
+    y_hum = Filter().process(config.ADC_MID + hum)
+    y_emg = Filter().process(config.ADC_MID + emg)
+    assert np.std(y_hum[late]) < 0.05 * np.std(hum)
+    assert np.std(y_emg[late]) > 0.9 * np.std(emg)
+    x = config.ADC_MID + hum + emg + np.random.default_rng(1).normal(size=len(t))
     f = Filter()
     chunked = np.concatenate([f.process(c) for c in np.array_split(x, 11)])
-    assert np.allclose(Filter().process(x), x) and np.allclose(chunked, x)
+    assert np.allclose(Filter().process(x), chunked)
+
+
+def test_filter_starts_without_offset_jump():
+    """A constant ADC offset passes unchanged from the first sample on (no start transient)."""
+    assert np.allclose(Filter().process(np.full(500, 1648.0)), 1648.0)
 
 
 def test_features_ignore_adc_offset():
