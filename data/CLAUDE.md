@@ -13,18 +13,19 @@ data/demo/                      # record.py --source file (replay demo) – giti
 - `label`: 0 = rest, 1 = contract, from the timer: rows 0–7999 = 0, 8000–15999 = 1, 16000–23999 = 0.
 - The CSV is the FULL recording. Nobody cuts it. Transitions are skipped in code (`TRIM_S`).
 - `placement_id` E01, E02, …: same number = same electrodes on the skin. New number after re-applying.
-- Calibration (rest + max contraction, once per placement, from the web interface / machine):
+- Calibration (once per placement, run by the web page: prepare 3 s / rest 5 s / max contraction 5 s):
   ```
   data/raw/calibration_E01/       # one per placement, NOT a sample (no signal.csv)
     calibration.json              # placement_id, subject_id, operator_id, start_time_utc, sampling_rate_hz,
-                                  # rest_mV (mean 100 ms RMS at rest), max_mV (peak 100 ms RMS) - computed on the ESP32
-    calibration.csv               # t_s,value,step  - same signal as signal.csv, step 0 prepare / 1 rest /
-                                  # 2 max contraction / 3 calculating (step as seen by the browser, ±0.2 s → trim edges)
+                                  # rest_rms (median), max_rms (95th percentile) - computed by the page:
+                                  # RMS of 200 ms windows minus their mean, in ADC counts, 1st s of each step skipped
+    calibration.csv               # t_s,value,step - 13 000 rows, same signal as signal.csv,
+                                  # step from the timer (config.CALIB_STEPS): 0 prepare / 1 rest / 2 max contraction
   ```
 - Web interface samples/calibrations arrive as downloads (`semgia_sample_*.json`, `semgia_calib_*.json`).
   `python scripts/import_web.py` turns them into the folders above (labels from the timer, privacy check, no duplicates).
-- `value` from the web interface = raw 12-bit ESP32 ADC count (0..4095, rest ≈ 2048), same as the serial path.
-  `calibration.csv` uses the same counts; only `rest_mV` / `max_mV` are mV (the ESP32's own 100 ms RMS).
+- `value` from the web page = raw 12-bit ESP32 ADC count (0..4095; SEN0240 rest ≈ 1860), same as the serial path.
+  `calibration.csv` uses the same counts; `rest_rms` / `max_rms` are RMS in counts.
 - Subject `P000` / operator `OP00` / placement `E00` = test recordings. Don't commit them.
 
 ## Rules

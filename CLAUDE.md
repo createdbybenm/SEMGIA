@@ -19,7 +19,7 @@ This is a graded course project (M6 ML & IoT, Tec). **What we must hand in is in
 
 ## Architecture (don't add boxes)
 ```
-DFRobot SEN0240 sensor → ESP32 (12-bit, GPIO 34, firmware/HamShot_EMG) → its WEB PAGE (Wi-Fi, firmware/HamShot_EMG/pagina.h):
+DFRobot SEN0240 sensor → ESP32 (12-bit, GPIO 34, firmware/semgia_emg) → its WEB PAGE (Wi-Fi, firmware/semgia_emg/pagina.h):
    calibration once per electrode placement (rest + max contraction)
    → "Collect sample" → metadata form → 24 s with cues → data/raw/sample_NNN/ (source of truth)
 semgia/ + scripts/ (this repo): Filter → Windower → features → Calibration → Model → Smoother

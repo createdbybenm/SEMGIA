@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from semgia import config  # noqa: E402
-from semgia.recorder import save_web_calibration, save_web_sample  # noqa: E402
+from semgia.recorder import WEB_CALIB_FORMAT, save_web_calibration, save_web_sample  # noqa: E402
 
 
 def find_files(paths: list[str]) -> list[Path]:
@@ -54,14 +54,14 @@ def main() -> int:
     def order(fp):
         payload = fp[1]
         start = payload.get("start_time_utc") or payload.get("metadata", {}).get("start_time_utc", "")
-        return payload.get("format") != "semgia-calib-1", start
+        return payload.get("format") != WEB_CALIB_FORMAT, start
 
     loaded.sort(key=order)
 
     new = 0
     for f, payload in loaded:
         try:
-            if payload.get("format") == "semgia-calib-1":
+            if payload.get("format") == WEB_CALIB_FORMAT:
                 out = save_web_calibration(payload, Path(a.out))
             else:
                 out = save_web_sample(payload, Path(a.out), upload=a.upload)
