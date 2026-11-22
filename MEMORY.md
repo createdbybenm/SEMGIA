@@ -4,7 +4,7 @@ One line per entry, newest first within a section, always dated (YYYY-MM-DD) + i
 Add entries in the same PR as the change. Delete lines that are no longer true. Keep it < 150 lines.
 
 ## Decisions
-- 2026-11-21 CO – Consent form written: `docs/consent_form.md` (paper only, covers GitHub + Azure EU storage). Signed copies stay on paper.
+- 2026-11-21 CO – Consent form written: `docs/consent_form.docx` (print, fill blanks by hand, sign on paper; covers GitHub + Azure EU storage; one per person: P001 for E01, P002 for E02–E06). Signed copies stay on paper.
 - 2026-11-21 CO – Sensor gives the raw signal (not an envelope) → `RAW_SIGNAL = True`. Muscle = right hamstrings.
 - 2026-11-21 BM – **Digital 60 Hz notch + harmonics in `processing.Filter`** (`NOTCH_HZ`, `NOTCH_Q`; causal, with state).
   The real data is 50–99 % mains hum at rest, the SEN0240 has no notch. Replaces "no digital filter" (2026-11-19).
