@@ -9,7 +9,7 @@ never saw). The model runs on the laptop; each recording is saved with its metad
 |---|---|---|---|
 | M01 | Silver0-sys | P1 Hardware & recordings | Claude Code (VS Code) |
 | M02 | createdbybenm | P2 AI | Claude Code (herdr terminal) |
-| M03 | CarlosOVa | P3 Azure & privacy | Claude Code (VS Code) |
+| M03 | CarlosOVa | P1 Hardware & recordings | Claude Code (VS Code) |
 | M04 | Ximenaabreugg | P4 Recording app & dashboard | Claude Code (VS Code) |
 
 ## Report 1: the data stage
