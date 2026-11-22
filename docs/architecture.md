@@ -1,6 +1,6 @@
 # Architecture
 
-> **Recording** will happen in our existing web interface (separate repo, Windows 11), adapted to write exactly the
+> **Recording** happens in the web page served by the EMG ESP32 (`firmware/HamShot_EMG/`, wiring in `firmware/CLAUDE.md`), adapted to write exactly the
 > files described below. `scripts/record.py` implements the same flow in Python as a backup/demo.
 
 ```

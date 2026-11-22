@@ -21,7 +21,7 @@ With the real sensor: flash `firmware/emg_serial`, then `python scripts/record.p
 With Azure: `cp .env.example .env` and add the connection string (see `docs/azure_setup.md`).
 
 ## How it works
-Recording happens in our web interface (separate repo); `scripts/record.py` is a Python backup with the same flow.
+Recording happens in the ESP32 web page (`firmware/HamShot_EMG/`); `scripts/record.py` is a Python backup with the same flow.
 Electrodes on → calibrate once (rest + max contraction) → press **Collect sample**, fill in the metadata form, and the app records one continuous 24 s sample
 (rest 8 s → contract 8 s → rest 8 s) into `data/raw/sample_NNN/`. Labels come from the timer. Training uses only
 the clean middle of each phase. Signals are scaled by the placement's calibration, which makes the model robust to new

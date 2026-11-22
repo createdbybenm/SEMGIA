@@ -32,8 +32,8 @@ TEST_PLACEMENTS: list[str] = []
 # --- Per-session setup for data/metadata.csv (not in metadata.json, same for every session so far) ---
 ELECTRODE_DISTANCE_CM = "TODO-P1"   # centre-to-centre distance of the two electrodes
 SKIN_PREPARATION = "TODO-P1"        # e.g. "alcohol wipe"
-SENSOR_MODEL = "TODO-P1"            # e.g. "MyoWare 2.0"
-GAIN = "TODO-P1"                    # analog gain of the sensor board
+SENSOR_MODEL = "DFRobot Gravity Analog EMG SEN0240 (OYMotion)"  # PCB front end not working (2026-11-21)
+GAIN = "1000"                       # analog gain of the sensor board (SEN0240 datasheet)
 ADC_BITS = 12                       # ESP32: 12-bit ADC (0..4095)
 
 # --- Quality check (QUALITY-REPORT.md) ---
