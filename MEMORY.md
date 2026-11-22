@@ -4,8 +4,9 @@ One line per entry, newest first within a section, always dated (YYYY-MM-DD) + i
 Add entries in the same PR as the change. Delete lines that are no longer true. Keep it < 150 lines.
 
 ## Decisions
-- 2026-11-21 – **ESP32 firmware + web page are in this repo: `firmware/HamShot_EMG/`** (was a local "separate repo").
-  Only the EMG board; the catapult station sketch is NOT in the repo (not part of the assignment).
+- 2026-11-21 – **One ESP32 does everything: `firmware/semgia_emg/`** (no station, no ESP-NOW; unrelated to the
+  HamShot catapult project). Board = sampler + Wi-Fi + page. The page runs calibration (prepare 3 / rest 5 /
+  max 5 s, `config.CALIB_STEPS`) and all RMS / % maths; format `semgia-calib-2` (rest_rms / max_rms in counts).
 - 2026-11-21 – Sensor now = **DFRobot Gravity Analog EMG SEN0240** (our PCB front end is not working): blue = signal →
   GPIO 34, red → 3V3/5V, black → GND. Analog output 0–3.0 V around 1.5 V (≈ 1860 counts), gain 1000, 20–500 Hz.
 - 2026-11-19 BM – **Model options: logreg (default), lda, forest** on the 4 frozen features; `ThresholdModel` = floor;
@@ -26,7 +27,7 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
   there are no conflicts and no foreign files/secrets; otherwise it stops and asks.
 - 2026-11-19 BM – Git: own short-lived branch per task (`name/task`), PR to main within 1–2 days. Shared AI context
   = files on `main` (CLAUDE.md, MEMORY.md, docs/course/), so merge doc PRs first.
-- 2026-11-20 – Web interface = HamShot ESP32 page (`http://192.168.4.1`, no HTTPS → browser can't write folders).
+- 2026-11-20 – Web interface = ESP32 page (`http://192.168.4.1`, no HTTPS → browser can't write folders).
   It **downloads** `semgia_sample_*.json` / `semgia_calib_*.json`; `python scripts/import_web.py` (default: ~/Downloads)
   creates `data/raw/sample_NNN/` + `data/raw/calibration_EXX/` (format in data/CLAUDE.md). Sample numbers are given
   at import → import on ONE machine. The import replays each sample through the record.py pipeline
@@ -62,7 +63,7 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - Repo scaffold merged: pipeline, tests, CI, docs, mock data, Python recording GUI, dashboard (local mode).
 - **Calibration in code is still per-sample** (`processing.sample_dataset` uses the sample's first rest phase).
   Per-placement calibration: file format now known (`data/raw/calibration_EXX/`, data/CLAUDE.md). Change point: `sample_calibration`.
-- Recording: web page (`firmware/HamShot_EMG/`) adapted (2026-11-20): calibration + "Tomar muestra" + 24 s cues + downloads
+- Recording: web page (`firmware/semgia_emg/`, 2026-11-21): calibration + "Tomar muestra" + 24 s cues + downloads
   → `import_web.py`. Tested in a browser against a mock ESP32 + compiled; NOT yet run on the real boards.
 - Hardware: real acquisition about to start. `firmware/emg_serial/emg_serial.ino` is written for an Arduino Uno (0..1023), not the ESP32.
 - AI: fair-split evaluation (`evaluate.py`, `--final` = test once), smoothed score, fresh/fatigued split done. Runs on
@@ -70,8 +71,6 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - Azure: not set up yet. Upload + dashboard code tested offline / local mode only.
 
 ## Known problems / gotchas
-- 2026-11-21 – "Calibrar colocación" needs the catapult station board (it runs the rest/max sequence). Without it only
-  "Tomar muestra" works (page warns "no calibration"); per-sample rest baseline still works in code.
 - 2026-11-21 – SEN0240 saturates at 3.0 V ≈ 3720 counts, not 4095 → `check_signal` won't flag that clipping. Look at the
   plot. Its filters: 20–500 Hz, no 60 Hz notch stated (DFRobot does the notch in software) → filter decision above is for
   the PCB, P1/P2 to recheck with real data.
@@ -94,7 +93,7 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - Warning cue before the contraction (`warning_s`)? Currently 0 s.
 - Professor's GitHub user, to add as collaborator. Member codes M01–M04: who is who?
 - Raw output or envelope from the sensor? → decides RAW_SIGNAL.
-- FS = 1000 Hz on the ESP32? HamShot_EMG samples at 1 kHz with a FreeRTOS 1 ms task – confirm on hardware (P1).
+- FS = 1000 Hz on the ESP32? FreeRTOS 1 ms task; the Serial Monitor prints `samples/s` every 10 s – confirm on hardware (P1).
 - Which muscle? (default: biceps brachii right)
 - The consent form MUST allow storing data on GitHub (Report 1 requires every recording in `data/raw/`). Check the wording.
 - Is TRIM_S = 1.5 s right? Check on real train data with `scripts/first_look.py` (literature: onset ≈ 0.33 s after cue).

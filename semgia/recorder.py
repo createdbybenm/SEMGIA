@@ -120,9 +120,10 @@ class SampleRecorder:
         self.uploader.close()
 
 
-# --- Files downloaded by the web interface (ESP32 page, HamShot_EMG/pagina.h) ---
+# --- Files downloaded by the web page (firmware/semgia_emg/pagina.h) ---
 WEB_SAMPLE_FORMAT = "semgia-sample-1"
-WEB_CALIB_FORMAT = "semgia-calib-1"
+WEB_CALIB_FORMAT = "semgia-calib-2"
+CALIB_N = sum(s for _, s in config.CALIB_STEPS) * config.FS
 CHOICES = {"muscle": config.MUSCLES, "side": config.SIDES, "effort": config.EFFORTS,
            "condition": config.CONDITIONS}
 
@@ -171,7 +172,9 @@ def save_web_sample(payload: dict, root: Path = config.DATA_RAW, model=None,
 def save_web_calibration(payload: dict, root: Path = config.DATA_RAW) -> Path | None:
     """One downloaded web calibration -> data/raw/calibration_EXX/{calibration.json, calibration.csv}.
 
-    calibration.csv = t_s,value,step (step: 0 prepare, 1 rest, 2 max contraction, 3 calculating).
+    calibration.csv = t_s,value,step. step comes from the timer (config.CALIB_STEPS: 0 prepare, 1 rest,
+    2 max contraction), like the sample labels - never from the file. rest_rms / max_rms = what the page
+    computed (RMS of 200 ms windows minus their mean, in ADC counts).
     Returns None if this calibration was already imported. Raises ValueError if the placement
     already has a different calibration (delete the folder by hand to replace it).
     """
@@ -183,11 +186,15 @@ def save_web_calibration(payload: dict, root: Path = config.DATA_RAW) -> Path | 
             raise ValueError(f"bad {key} {payload.get(key)!r} (pseudonyms only: P001 / OP01 / E01)")
     if int(payload.get("sampling_rate_hz", 0)) != config.FS:
         raise ValueError(f"sampling_rate_hz {payload.get('sampling_rate_hz')} != config.FS {config.FS}")
-    values, steps = payload["values"], payload["steps"]
-    if len(values) != len(steps) or not values:
-        raise ValueError("calibration values/steps are empty or of different length")
+    values = np.asarray(payload["values"], dtype=float)
+    if len(values) != CALIB_N:
+        raise ValueError(f"calibration has {len(values)} rows, expected {CALIB_N} (aborted?)")
+    adc_max = 2 ** config.ADC_BITS - 1
+    if values.min() < 0 or values.max() > adc_max:
+        raise ValueError(f"values outside 0..{adc_max}: not raw ADC counts")
+    steps = np.concatenate([np.full(s * config.FS, st) for st, s in config.CALIB_STEPS])
     info = {k: payload[k] for k in ("placement_id", "subject_id", "operator_id", "start_time_utc",
-                                    "sampling_rate_hz", "rest_mV", "max_mV")}
+                                    "sampling_rate_hz", "rest_rms", "max_rms")}
     folder = Path(root) / f"calibration_{info['placement_id']}"
     if folder.exists():
         old = json.loads((folder / "calibration.json").read_text())

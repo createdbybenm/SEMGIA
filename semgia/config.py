@@ -23,6 +23,12 @@ SAMPLES_PER_PLACEMENT = 10  # plan per placement (= web page N_PLAN): cue screen
 TRIM_S = 1.5              # windows closer than this to a label change / the start / the end are not "clean"
                           # -> each 8 s phase keeps its middle 5 s for training
 
+# --- Calibration: once per placement, run by the web page (firmware/semgia_emg/pagina.h) ---
+CALIB_PREPARE, CALIB_REST, CALIB_MAX = 0, 1, 2
+CALIB_STEPS = [(CALIB_PREPARE, 3), (CALIB_REST, 5), (CALIB_MAX, 5)]   # (step, seconds), page PASOS_CAL
+CALIB_SKIP_S = 1.0        # first second of the rest / max step is ignored (reaction time)
+CALIB_MIN_RATIO = 2.0     # max RMS must be >= 2x rest RMS, otherwise the page rejects the calibration
+
 # --- Fair split (course rule) ---
 # The ONLY place that defines the test set. Fill with e.g. the last 2 placements once recorded
 # (["E05", "E06"]).

@@ -163,21 +163,52 @@ def test_web_sample_passes_the_quality_check(tmp_path):
 
 
 def test_web_calibration_is_saved_per_placement_and_not_a_sample(tmp_path):
-    from semgia.recorder import save_web_calibration
+    from semgia.recorder import CALIB_N, save_web_calibration
     from semgia.storage import list_samples
-    cal = {"format": "semgia-calib-1", "placement_id": "E01", "subject_id": "P001", "operator_id": "OP01",
-           "start_time_utc": "2026-11-20T09:55:00+00:00", "sampling_rate_hz": 1000, "rest_mV": 4.2,
-           "max_mV": 180.5, "values": [1, -2, 3], "steps": [0, 1, 2]}
+    cal = {"format": "semgia-calib-2", "placement_id": "E01", "subject_id": "P001", "operator_id": "OP01",
+           "start_time_utc": "2026-11-20T09:55:00+00:00", "sampling_rate_hz": 1000, "rest_rms": 4.2,
+           "max_rms": 180.5, "values": [1860] * CALIB_N}
     d = save_web_calibration(cal, tmp_path)
     assert d.name == "calibration_E01"
-    assert json.loads((d / "calibration.json").read_text())["max_mV"] == 180.5
-    assert pd.read_csv(d / "calibration.csv").step.tolist() == [0, 1, 2]
+    assert json.loads((d / "calibration.json").read_text())["max_rms"] == 180.5
+    steps = pd.read_csv(d / "calibration.csv").step                     # from the timer, like labels
+    assert len(steps) == CALIB_N and steps.tolist() == [0] * 3000 + [1] * 5000 + [2] * 5000
     assert list_samples(tmp_path) == [] and next_sample_id(tmp_path) == "sample_001"
     assert save_web_calibration(cal, tmp_path) is None                  # same file again: skipped
     with pytest.raises(ValueError):                                     # a different one: refused
         save_web_calibration({**cal, "start_time_utc": "2026-11-20T11:00:00+00:00"}, tmp_path)
     with pytest.raises(ValueError):
         save_web_calibration({**cal, "placement_id": "E02", "subject_id": "Anna"}, tmp_path)
+    with pytest.raises(ValueError):                                     # aborted calibration
+        save_web_calibration({**cal, "placement_id": "E03", "values": [1860] * 100}, tmp_path)
+
+
+def test_web_page_constants_match_config():
+    """The page (firmware/semgia_emg/pagina.h) must use the same protocol + dropdowns as config.py."""
+    import re
+    from pathlib import Path
+    page = (Path(__file__).resolve().parents[1] / "firmware" / "semgia_emg" / "pagina.h").read_text("utf-8")
+
+    def js(name):
+        """Value of `const NAME=...` in the page: a number or a (nested) array literal."""
+        m = re.search(r"(?<!\w)" + name + r"=", page)
+        assert m, f"{name} not found in pagina.h"
+        i, depth = m.end(), 0
+        for j in range(i, len(page)):
+            depth += {"[": 1, "]": -1}.get(page[j], 0)
+            if depth == 0 and page[j] in ";,":
+                return json.loads(page[i:j].replace("'", '"'))
+    assert js("FSR") == config.FS
+    assert js("PASOS") == [list(x) for x in config.SAMPLE_STEPS]
+    assert js("N_MUESTRA") == SAMPLE_N
+    assert js("PASOS_CAL") == [list(x) for x in config.CALIB_STEPS]
+    assert js("N_CAL") == sum(s for _, s in config.CALIB_STEPS) * config.FS
+    assert js("CAL_SALTAR") == config.CALIB_SKIP_S * config.FS
+    assert js("CAL_MIN_RATIO") == config.CALIB_MIN_RATIO
+    assert js("VENT") == config.WINDOW
+    assert js("N_PLAN") == config.SAMPLES_PER_PLACEMENT
+    assert js("MUSCULOS") == config.MUSCLES and js("LADOS") == config.SIDES
+    assert js("ESFUERZOS") == config.EFFORTS and js("CONDICIONES") == config.CONDITIONS
 
 
 def test_file_source_rewind_restarts_the_replay(tmp_path):
@@ -192,3 +223,25 @@ def test_file_source_rewind_restarts_the_replay(tmp_path):
     assert src.pos == 0
     time.sleep(0.002)
     assert src.read()[0] == 10                          # starts at the first value again
+
+
+def test_import_web_script_imports_calibration_and_sample(tmp_path):
+    """import_web.py must recognise both download types (bug: the new calib format was read as a sample)."""
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    from semgia.recorder import CALIB_N, WEB_CALIB_FORMAT
+    downloads, out = tmp_path / "dl", tmp_path / "raw"
+    downloads.mkdir()
+    cal = {"format": WEB_CALIB_FORMAT, "placement_id": "E01", "subject_id": "P001", "operator_id": "OP01",
+           "start_time_utc": "2026-11-20T09:55:00+00:00", "sampling_rate_hz": 1000, "rest_rms": 4.2,
+           "max_rms": 180.5, "values": [1860] * CALIB_N}
+    (downloads / "semgia_calib_E01_x.json").write_text(json.dumps(cal))
+    (downloads / "semgia_sample_E01_x.json").write_text(json.dumps(web_sample()))
+    script = Path(__file__).resolve().parents[1] / "scripts" / "import_web.py"
+    run = subprocess.run([sys.executable, str(script), str(downloads), "--out", str(out)],
+                         capture_output=True, text=True)
+    assert run.returncode == 0, run.stdout + run.stderr
+    assert (out / "calibration_E01" / "calibration.csv").exists()
+    assert (out / "sample_001" / "signal.csv").exists()

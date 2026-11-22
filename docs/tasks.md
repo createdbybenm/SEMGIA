@@ -57,7 +57,7 @@ Each item goes on its own branch + PR. Don't copy the professor's example (it ge
 6. Test deleting one sample everywhere (`docs/privacy.md`). Write the privacy section of the report.
 
 ## Person 4 – Web interface (recording) & dashboard
-**Owns:** our web interface (`firmware/HamShot_EMG/pagina.h`), `scripts/record.py` (backup), `semgia/recorder.py`,
+**Owns:** our web interface (`firmware/semgia_emg/pagina.h`), `scripts/record.py` (backup), `semgia/recorder.py`,
 `dashboard/app.py`, `README.md`, CI
 
 1. **Now:** `python scripts/record.py --source mock` → click through a sample. This is the reference for the flow.
