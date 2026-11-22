@@ -35,4 +35,5 @@ The same three steps run live and offline (one code path), so the model sees the
 `data/raw/` keeps the unfiltered ADC values; filters 2 and 3 are applied in code.
 
 ## Agreement (one line per member, each from their own account)
+- M01 (Silver0-sys): I read the method and I agree.
 - M02 (createdbybenm): I read the method and I agree.
