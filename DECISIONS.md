@@ -1,67 +1,58 @@
-**DRAFT – Ben rewrites the reasons in his own words before Report 1.**
-
 # Decisions
 
-For every part: what we chose, the reason, and what we still do not understand.
-All choices are made with the training sessions only. A session is one electrode placement (E01, E02, ...).
-The test sessions are listed in `TEST_PLACEMENTS` in `semgia/config.py` and are opened once, at the end
-(`python scripts/evaluate.py --final`).
+Every choice below was made with the training sessions only (E02 to E05). The test session E06 is opened once, at the
+end (`python scripts/evaluate.py --final`). A session is one electrode placement.
 
 ## 7 Features
 
-What we chose: four numbers per 200 ms window (new window every 100 ms): RMS, mean absolute value (MAV),
-waveform length (WL) and zero crossings (ZC). Each one is divided by the rest level, so 1.0 means "like rest".
-Right now the rest level is the first rest phase of the same sample. The plan is one calibration per placement. Windows closer than 1.5 s to a cue change are not used for training (TRIM_S).
-Filtering is analog (20-447 Hz band-pass and 60 Hz notch), so in software we only subtract the mean
-of each window to remove the ESP32 offset of about 2048.
+Chose: four numbers per 200 ms window, with a new window every 100 ms: RMS, mean absolute value (MAV), waveform length
+(WL) and zero crossings (ZC). Each one is divided by the rest level of the recording, so 1.0 means "like rest". For
+training we only use windows that are at least 1.5 s away from a cue change.
 
-Why (reason): RMS, MAV and WL measure the size of the signal, and in a contraction they go up several
-times. ZC is a rough frequency measure, and the frequency drops with fatigue, so it should help with the
-fatigued samples. Dividing by rest removes the gain that changes every time the electrodes go on again.
-The 1.5 s trim is about four times the normal reaction time after a visual cue: Xiao et al. 2024 measured
-a median of 0.333 s from cue to EMG onset, and 0.386 s after fatigue. So the clean windows should really be
-steady rest or steady contraction. We will check this by eye on our training data with
-`scripts/first_look.py`.
+Reason: RMS, MAV and WL measure how big the signal is, and in our recordings they go up several times when the
+hamstrings contract. ZC is a rough measure of frequency, which drops with fatigue, so it should help on the fatigued
+recordings. Dividing by the rest level removes the gain change that comes with every new electrode placement. The
+1.5 s gap is about four times the normal reaction time after a cue (median 0.333 s in Xiao et al. 2024).
 
-Not understood yet: whether ZC adds anything on our sensor, or if RMS alone is enough. We also do not
-know yet how long the biceps needs to relax after the cue, because we found no number for the offset.
-
-Source: Xiao et al. 2024 (see Sources).
+Not understood yet: whether ZC adds anything on our sensor or whether RMS alone is enough, and how long the
+hamstrings need to fully relax after the rest cue.
 
 ## 8 Model
 
-What we chose: not decided yet. We compare three options on the same four features:
-logistic regression (our default), LDA and a random forest. A threshold on RMS (3x rest on, 2x rest off)
-is the floor every model has to beat. A majority vote over the last 5 windows smooths the output.
+Chose: not decided yet. We compare three models on the same four features: logistic regression, linear discriminant
+analysis (LDA) and a random forest. A threshold on RMS (above 3 times rest is contraction, below 2 times rest is rest)
+is the floor every model has to beat, and chance is 67 % because rest is 16 s of every 24 s. In our first
+leave-one-session-out run on the training sessions, logistic regression reached 0.90 on clean windows and 0.85 on all
+windows, LDA 0.90 and 0.85, the random forest 0.88 and 0.83, and the threshold 0.80 and 0.78. We take the one that is
+best on the training sessions and test it once on E06.
 
-Why (reason): We need a model that still works when the electrodes are put on again. In Kaufmann et al.
-2010 (21 days of EMG), LDA lost only 3.6 percentage points when it was not retrained (first 5 vs. recent
-5 trials), the other models lost 8.6 to 14.6 points. Young et al. 2011 found that LDA generalised better
-than a neural network when the electrodes were shifted. Logistic regression is also linear, and we can
-explain it with one weight per feature. The random forest is only there to show if a non-linear model helps
-on our data. We score with leave-one-placement-out on the training sessions, and we always report accuracy
-and balanced accuracy next to two floors: chance (share of the bigger class, about 67 % because rest is
-16 s of 24 s) and the threshold model. Rest is twice as long as contraction, so we use class weights
-(LDA: equal priors) and do not resample. Van den Goorbergh et al. 2022 showed that resampling made
-logistic regression badly calibrated and did not improve the AUC. The final choice waits for real data.
+Reason: we have only 23 usable training recordings, so a simple linear model should transfer best to a new electrode
+placement. Kaufmann et al. 2010 and Young et al. 2011 found that LDA stayed more stable than other models over days and
+with shifted electrodes. The random forest shows whether a non-linear border helps at all. Rest is twice as long as
+contraction, so we use class weights and do not resample (van den Goorbergh et al. 2022).
 
-Not understood yet: how LDA draws the border when rest windows vary much less than contraction
-windows, since LDA assumes the same spread for both classes. On our mock data it already missed part of
-a fatigued sample. We also do not know if smoothing helps overall, because it adds about 0.2 s of delay at
-every cue change.
-
-Source: Kaufmann et al. 2010, Young et al. 2011, van den Goorbergh et al. 2022 (see Sources).
+Not understood yet: how LDA draws the border when the rest windows vary much less than the contraction windows, and
+whether smoothing the output over 5 windows helps more than the delay it adds at every cue change.
 
 ## 9 Route
 
-(P3 writes this)
+Chose: the model runs in our own Python software on the laptop, which gets the signal from the ESP32 web page. Each
+recording is saved locally first and then uploaded with its metadata to Microsoft Azure (Blob Storage for the signal,
+Table Storage for metadata and predictions), and a small dashboard on Azure App Service shows the records.
+
+Reason: the features and the models are already in Python, and the laptop receives the data anyway. Saving locally
+first means a network problem never loses a recording, and Azure has a free student plan.
+
+Not understood yet: how the ESP32 page could upload a record to Azure directly without the import step on the laptop,
+and whether the model would be fast enough as TinyML on the ESP32.
 
 ## Sources
-- Kaufmann P, Englehart K, Platzner M. Fluctuating EMG signals: investigating long-term effects of pattern
-  matching algorithms. IEEE EMBC 2010:6357-60. doi:10.1109/IEMBS.2010.5627288
-- Young AJ, Hargrove LJ, Kuiken TA. IEEE TBME 2011;58(9):2537-44. doi:10.1109/TBME.2011.2159216
-- Xiao et al. 2024. Relationship between fear-avoidance beliefs and reaction time changes prior to and
-  following exercise-induced muscle fatigue in chronic low back pain. doi:10.1155/2024/9982411
-- van den Goorbergh R, van Smeden M, Timmerman D, Van Calster B. The harm of class imbalance corrections
-  for risk prediction models. JAMIA 2022;29(9):1525-34. doi:10.1093/jamia/ocac093
-- Details and quotes: `docs/report/model_research.md`.
+- Kaufmann P, Englehart K, Platzner M. Fluctuating EMG signals: investigating long-term effects of pattern matching
+  algorithms. IEEE EMBC 2010:6357-60. doi:10.1109/IEMBS.2010.5627288
+- Young AJ, Hargrove LJ, Kuiken TA. The effects of electrode size and orientation on the sensitivity of myoelectric
+  pattern recognition systems to electrode shift. IEEE TBME 2011;58(9):2537-44. doi:10.1109/TBME.2011.2159216
+- Xiao et al. 2024. Relationship between fear-avoidance beliefs and reaction time changes prior to and following
+  exercise-induced muscle fatigue in chronic low back pain. doi:10.1155/2024/9982411
+- van den Goorbergh R, van Smeden M, Timmerman D, Van Calster B. The harm of class imbalance corrections for risk
+  prediction models. JAMIA 2022;29(9):1525-34. doi:10.1093/jamia/ocac093
+- Full train results: `docs/report/results_train.md`.
