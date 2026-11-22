@@ -54,8 +54,6 @@ Source: Kaufmann et al. 2010, Young et al. 2011, van den Goorbergh et al. 2022 (
 
 ## 9 Route
 
-**DRAFT – Carlos rewrites the reason and the "not understood" line in his own words.**
-
 What we chose: the model runs in our own Python software on the laptop (`scripts/record.py` / `import_web.py`
 replay the signal through the same filter, features and model as training). Each recording is saved locally first
 (`data/raw/sample_NNN/`), then uploaded to Microsoft Azure: the raw signal as blobs (container `signals`), the
@@ -64,16 +62,15 @@ A small Streamlit dashboard on Azure App Service (free F1 plan) reads them back,
 record. Everything sits in the region belgiumcentral (EU), with no public access. Evidence: `semgia/storage.py`,
 `docs/azure_setup.md`, `figures/azure_record.png` (one saved record with its metadata).
 
-Why (reason): TODO Carlos, in your own words. Points you can use: the laptop already runs the whole
-pipeline, so we do not need to port the model to the ESP32 (no TinyML conversion, no second feature
-path that could behave differently); the local save means a lost Wi-Fi connection never loses a
-recording, and the upload is retried later (`scripts/upload_sample.py`); Azure for Students is free
-and the budget alert stops surprise costs; tables and blobs let us delete one sample everywhere
-(`scripts/delete_sample.py`) when a person asks.
+Why (reason): our Python code on the laptop already does everything: filter, features and model.
+If we moved the model to the ESP32 we would have to write it a second time, and the two versions could
+give different answers. We save every recording on the laptop first, so if the Wi-Fi fails we lose
+nothing and upload it later. We picked Azure because our student account is free, we set a budget
+alert so it cannot cost us money, and we can delete one person's recording everywhere with one command.
 
-Not understood yet: TODO Carlos. Something you really do not understand yet, for example: whether the
-free F1 plan is fast enough to show the record during the live demo, or how we would run the model on
-the ESP32 if we had no laptop.
+Not understood yet: whether the free dashboard plan is fast enough for the live demo (it sleeps when
+nobody uses it and the first load takes about a minute), and how the ESP32 itself could send the
+record to Azure if one day we wanted to work without the laptop.
 
 ## Sources
 - Kaufmann P, Englehart K, Platzner M. Fluctuating EMG signals: investigating long-term effects of pattern

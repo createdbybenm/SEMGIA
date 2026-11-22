@@ -1,12 +1,11 @@
 # Mxx – Carlos (P3 Azure)
 
-<!-- About 100 words, in your OWN words. Delete these comments before committing.
-     Rename this file to your member code, e.g. rationale/M03.md. -->
+**The choice I support:** the model runs on our laptop, and Azure only stores the recordings and shows them.
 
-**The choice:** <!-- one group choice you support or doubt, e.g. "running the model on the laptop and only
-storing data in Azure" or "keeping all data in the EU region" -->
+Each recording is saved on the laptop first and uploaded to Azure after. I support this because a classroom
+Wi-Fi can fail, and a recording that only lived in the cloud would then be lost. On the laptop we also use
+the same Python code for training and for the live test, so the model sees the signal in the same way both
+times. Azure keeps the metadata of each recording in a table, one row per recording, a bit like a patient
+file. My doubt: the free dashboard is slow to wake up, so we must open it before the demo.
 
-**I support / I doubt it, because:** <!-- 3–5 sentences, your reasons -->
-
-**Source:** <!-- one source you found yourself: author, title, year, link. Example of the format:
-Microsoft. Azure Table storage overview. learn.microsoft.com/azure/storage/tables/table-storage-overview -->
+**Source:** Microsoft Learn. "What is Azure Table storage?" https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-overview
