@@ -100,7 +100,8 @@ def test_uploader_bad_connection_string_never_raises(tmp_path):
 
 # --- files downloaded by the web interface (scripts/import_web.py) ---
 def web_sample(**meta):
-    m = dict(IDS, muscle="biceps brachii", side="right", sensor_id="HamShot-EMG", electrode_type="",
+    m = dict(IDS, muscle="biceps brachii", side="right", sensor_id="DFRobot-SEN0240",
+             electrode_type="dry (built-in)",
              effort="light", condition="fresh", sampling_rate_hz=1000,
              start_time_utc="2026-11-20T10:00:00+00:00", notes="", placement_notes="")
     m.update(meta)

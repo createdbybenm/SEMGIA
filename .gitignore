@@ -25,3 +25,8 @@ data/demo/
 
 # notebooks checkpoints
 .ipynb_checkpoints/
+
+# arduino build output
+firmware/**/build/
+*.bin
+*.elf

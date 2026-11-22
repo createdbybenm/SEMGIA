@@ -13,7 +13,7 @@
 | `upload_sample.py` | push offline-recorded samples to Azure | `python scripts/upload_sample.py data/raw/sample_007` |
 
 ## record.py
-- **Backup/demo only.** The real recording happens in our web interface (separate repo). Keep record.py working and
+- **Backup/demo only.** The real recording happens in the ESP32 web page (`firmware/HamShot_EMG/`). Keep record.py working and
   in line with the same file format, but don't add big features here.
 - GUI: tkinter + embedded matplotlib. `App` holds the logic (`tick()` = read → predict → record),
   `run_gui()` only displays it. `--no-gui` runs the same `App` headless (used for testing). Keep it that way.
