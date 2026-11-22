@@ -4,6 +4,8 @@ One line per entry, newest first within a section, always dated (YYYY-MM-DD) + i
 Add entries in the same PR as the change. Delete lines that are no longer true. Keep it < 150 lines.
 
 ## Decisions
+- 2026-11-21 CO – Consent form written: `docs/consent_form.md` (paper only, covers GitHub + Azure EU storage). Signed copies stay on paper.
+- 2026-11-21 CO – Sensor gives the raw signal (not an envelope) → `RAW_SIGNAL = True`. Muscle = right hamstrings.
 - 2026-11-21 BM – **Digital 60 Hz notch + harmonics in `processing.Filter`** (`NOTCH_HZ`, `NOTCH_Q`; causal, with state).
   The real data is 50–99 % mains hum at rest, the SEN0240 has no notch. Replaces "no digital filter" (2026-11-19).
 - 2026-11-21 BM – **Patient = P002** (`config.PATIENT_ID`). Round 1 (E01) was another person (P001): imported (every
@@ -113,8 +115,6 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - Warning cue before the contraction (`warning_s`)? Currently 0 s.
 - Professor's GitHub user, to add as collaborator. Member codes M01–M04: who is who?
 - FS = 1000 Hz on the ESP32? HamShot_EMG samples at 1 kHz with a FreeRTOS 1 ms task – confirm on hardware (P1).
-- 2026-11-21 CO – Consent form written: `docs/consent_form.md` (paper only, covers GitHub + Azure EU storage). Signed copies stay on paper.
-- 2026-11-21 CO – Sensor gives the raw signal (not an envelope) → `RAW_SIGNAL = True`. Muscle = right hamstrings.
 - Is TRIM_S = 1.5 s right? Check on real train data with `scripts/first_look.py` (literature: onset ≈ 0.33 s after cue).
 - Per-session values for metadata.csv (P1): electrode distance, skin preparation, sensor model, gain
   (`config.py`, now "TODO-P1").
