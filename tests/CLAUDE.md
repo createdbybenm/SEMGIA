@@ -3,7 +3,8 @@
 Run everything: `pytest -q` (CI runs this + `ruff check .` on every PR).
 
 ## Rules
-- One test file per area: `test_processing.py`, `test_model.py`, `test_sources_storage.py`. Add to them before creating new ones.
+- One test file per area: `test_processing.py`, `test_model.py`, `test_evaluation.py`, `test_report.py`,
+  `test_sources_storage.py`. Add to them before creating new ones.
 - Tests must run without hardware, internet or Azure: use `MockSource`, `make_sample(tmp_path, ...)` and
   `AzureUploader(..., conn_str="")`. Never read from or write to the real `data/raw`. Use `tmp_path`.
 - Fast: the whole suite stays under ~10 s. Use `MockSource.generate(n)` instead of real-time `read()` + sleep.

@@ -15,7 +15,7 @@
 | **blue** | `A` – analog signal 0–3.0 V | **GPIO 34** (`PIN_EMG`, ADC1) |
 | **red** | `+` – supply 3.3–5.5 V | **3V3** (or 5V/VIN when powered by USB) |
 | **black** | `-` – 0 V | **GND** |
-- The output is **analog** (amplified ×1000, 20–500 Hz, centred on 1.5 V ≈ 1860 counts), not digital and not an
+- The output is **analog** (amplified ×1000, 20–500 Hz, nominal centre 1.5 V; measured rest ≈ 1650 counts), not digital and not an
   envelope → analog pin, `RAW_SIGNAL = True`.
 - ADC1 pins only (GPIO 32–39). ADC2 pins do not work while Wi-Fi is on. GPIO 34–39 are input-only, which is fine.
 - Colours: Gravity standard. If your cable differs, follow the `A / + / -` labels on the sensor board.

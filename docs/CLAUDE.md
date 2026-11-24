@@ -8,7 +8,7 @@
 | `privacy.md` | privacy rules (LFPDPPP/GDPR), consent, what is stored where |
 | `azure_setup.md` | portal steps to create + deploy the Azure resources |
 | `git_workflow.md` | beginner Git/GitHub commands for the team |
-| `tasks.md` | week-by-week tasks per role |
+| `tasks.md` | who owns which files (+ the historical week plan) |
 | `report/` | final report material (figures, results) |
 
 ## Rules

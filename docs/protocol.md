@@ -11,7 +11,9 @@ One sample = 24 s (rest 8 s → contract 8 s → rest 8 s). One placement ≈ 10
 - [ ] Laptop **on battery, charger unplugged** (electrical safety)
 - [ ] Always the **same recording laptop** (Windows 11, sample numbers are counted per laptop). `git pull` first.
 - [ ] `.env` present (or record offline and run `upload_sample.py` later)
-- [ ] Sensor connected, Arduino Serial Plotter shows a signal, then close the Serial Plotter (it blocks the port)
+- [ ] Sensor connected, web page (`http://192.168.4.1`) shows the live graph and it moves when the muscle contracts
+- [ ] Before **each** sample: strap tight, live signal quiet at rest. The hum grows during a placement (dry electrodes
+      lose contact) and can push the signal to 0 → clipped, rejected sample (17 of 59 on 2026-11-21)
 
 ## Electrode placement (new placement ID each time electrodes go on)
 1. Clean the skin with alcohol, let it dry. Shave if necessary.

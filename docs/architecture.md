@@ -23,13 +23,14 @@
    App Service  ── dashboard/app.py (Streamlit, read-only, polls every 3 s)
 ```
 
-## Calibration (agreed target – not implemented yet)
+## Calibration (agreed, not built)
 Once per patient + electrode placement, with the web interface's existing sequence: rest, then max contraction.
 → rest level = 0, max contraction = 1 for **all samples of that placement**.
 Why: in live use you calibrate once after putting the electrodes on, then the AI simply runs.
 Calibration only removes nuisance variation (electrode gain, skin contact). Rest vs. contraction, effort and
-fatigue stay fully visible, so the AI still learns them. `evaluate.py` will compare calibrated vs. raw features.
-**Current code:** still uses each sample's own first rest phase as baseline (shown below as "baseline").
+fatigue stay fully visible, so the AI still learns them.
+**Current code (also for the final, MEMORY.md 2026-11-24):** each sample's own first rest phase is the baseline
+(shown below as "baseline"). Built twice: offline `processing.sample_calibration`, live `recorder.SampleRecorder`.
 
 ## One sample (24 s, continuous)
 ```
@@ -44,7 +45,7 @@ baseline  [1.5–6.5]                                 ← rest level of this sam
   New electrodes / skin contact change the amplitude, and the baseline cancels that out.
 
 ## Why it's robust
-- Electrode re-placement → calibration once per placement (target; code: per-sample rest baseline for now).
+- Electrode re-placement → per-sample rest baseline (per-placement calibration agreed, not built).
 - Fatigue → amplitude up, frequency down → ratio features + `fatigued` samples in the training data.
 - Reaction time / slow ramps → the transitions are excluded from training (clean windows only).
 - Flickering → hysteresis (threshold model) + majority-vote smoothing.
@@ -76,7 +77,7 @@ It is not fixed: evaluate.py compares the models below and real data decides (so
    2 Hz wide) at `NOTCH_HZ` = 60 Hz and every multiple below Fs/2 (60 … 480 Hz), 2nd order each, as cascaded
    biquads (`sosfilt`). It keeps its state between chunks, so live = offline. With it, contractions are visible in
    34 of 59 real samples (2 of 59 without).
-3. `features` subtracts each window's mean (ESP32 offset, rest ≈ 1648 counts with the SEN0240; not for an envelope
+3. `features` subtracts each window's mean (ESP32 offset, rest ≈ 1650 counts measured with the SEN0240; not for an envelope
    sensor, `RAW_SIGNAL = False`). Document all three in PROTOCOL.md (P1).
 
 ## File formats
