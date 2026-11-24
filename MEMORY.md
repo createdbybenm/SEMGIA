@@ -8,8 +8,8 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
 - 2026-11-21 CO – Sensor gives the raw signal (not an envelope) → `RAW_SIGNAL = True`. Muscle = right hamstrings.
 - 2026-11-21 BM – PROTOCOL.md lists the digital 60 Hz notch as filter 2 (course: type, order, limits of EVERY filter).
   `data/raw/` stays unfiltered; notch + window-mean removal run in code (`Filter`, `features`).
-- 2026-11-21 BM – Model still open: on train LOPO logreg and LDA tie (0.90 clean / 0.85 all), forest 0.88 / 0.83.
-  Pick the best on train only, then `evaluate.py --final` once on E06.
+- 2026-11-24 BM – **Model = logreg** (`models/model.joblib`, trained on E02–E05). Tie with LDA on train LOPO → kept the
+  default. Test E06 opened once: 0.887 all / 0.949 clean windows (threshold 0.763, chance 0.665). Don't tune after this.
 - 2026-11-21 BM – `notebooks/` folder removed: no notebooks in the repo for now. The course's Colab project notebook
   (final delivery) is still open, see Open questions.
 - 2026-11-21 BM – **Digital 60 Hz notch + harmonics in `processing.Filter`** (`NOTCH_HZ`, `NOTCH_Q`; causal, with state).
@@ -90,8 +90,8 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
   strong); condition fresh for sample_019 (typed "fewah"). effort/condition elsewhere = as typed, partly unreliable.
   Calibration files (`semgia-calib-2`) not imported yet → after PR #8. E01 false starts 223604Z/223632Z = drop.
 - AI on real train data (LOPO E02–E05, `docs/report/results_train.md`): logreg 0.90 / 0.85, LDA 0.90 / 0.85,
-  forest 0.88 / 0.83 (clean / all windows); threshold floor 0.80 / 0.78, chance 0.67. Test (E06) not opened yet.
-  Not run yet: `first_look.py` (TRIM_S / threshold check), `train.py` (no `models/model.joblib`).
+  forest 0.88 / 0.83 (clean / all windows); threshold floor 0.80 / 0.78, chance 0.67. Final test: `docs/report/results_test.md`.
+  Not run yet: `first_look.py` (TRIM_S / threshold check).
 - Repo scaffold merged: pipeline, tests, CI, docs, mock data, Python recording GUI, dashboard (local mode).
 - **Calibration in code is still per-sample** (`processing.sample_dataset` uses the sample's first rest phase).
   Per-placement calibration: file format now known (`data/raw/calibration_EXX/`, data/CLAUDE.md). Change point: `sample_calibration`.
