@@ -4,6 +4,8 @@ One line per entry, newest first within a section, always dated (YYYY-MM-DD) + i
 Add entries in the same PR as the change. Delete lines that are no longer true. Keep it < 150 lines.
 
 ## Decisions
+- 2026-11-24 BM – **Model = logreg** (`models/model.joblib`, trained on E02–E05). Tie with LDA on train LOPO → kept the
+  default. Test E06 opened once: 0.887 all / 0.949 clean windows (threshold 0.763, chance 0.665). Don't tune after this.
 - 2026-11-24 BM – **Per-placement calibration is NOT built for the final.** Final class is today; the calibration files
   are `semgia-calib-2` (unmerged PR #8) and `import_web.py` only reads `semgia-calib-1`. The final test uses the
   per-sample rest baseline. Building it now would touch both baseline paths (`processing.sample_calibration` and
@@ -15,8 +17,6 @@ Add entries in the same PR as the change. Delete lines that are no longer true. 
   peak exactly at 60.0 Hz). Muscle = right hamstrings.
 - 2026-11-21 BM – PROTOCOL.md lists the digital 60 Hz notch as filter 2 (course: type, order, limits of EVERY filter).
   `data/raw/` stays unfiltered; notch + window-mean removal run in code (`Filter`, `features`).
-- 2026-11-24 BM – **Model = logreg** (`models/model.joblib`, trained on E02–E05). Tie with LDA on train LOPO → kept the
-  default. Test E06 opened once: 0.887 all / 0.949 clean windows (threshold 0.763, chance 0.665). Don't tune after this.
 - 2026-11-21 BM – `notebooks/` folder removed: no notebooks in the repo for now. The course's Colab project notebook
   (final delivery) is still open, see Open questions.
 - 2026-11-21 BM – **Digital 60 Hz notch + harmonics in `processing.Filter`** (`NOTCH_HZ`, `NOTCH_Q`; causal, with state).
