@@ -26,9 +26,8 @@ semgia/ + scripts/ (this repo): Filter → Windower → features → Calibration
    → train / evaluate / live AI · upload to Azure Storage (Blob + Table) ← dashboard/app.py (Streamlit)
 scripts/record.py = Python GUI with the same flow, backup/demo only
 ```
-**Transition in progress:** the code still calibrates each sample on its own first rest phase. Agreed target:
-one calibration per placement from the web interface (see MEMORY.md). Don't build on per-sample calibration.
-Details: @docs/architecture.md
+Calibration is per-sample (each sample's first rest phase); per-placement calibration was agreed but not built.
+Pipeline, file formats, filters, models: `docs/architecture.md` (read it before changing the pipeline or a file format).
 
 ## Hard rules
 - **Privacy:** never write real names, birth dates or other identifying data into code, data, logs, commits, tests or Azure.
@@ -36,7 +35,8 @@ Details: @docs/architecture.md
 - Never commit `.env`, keys or connection strings. Config comes from `.env` (see `.env.example`).
 - Local save comes first. The Azure upload is best effort and **must never raise or block** the recording.
 - **Frozen interfaces** (only change them after team agreement + a MEMORY.md entry):
-  `Source.read()/set_cue()/close()`, `Model.predict(features) -> int`, `METADATA_FIELDS`,
+  `Source.read()/set_cue()/close()`, `Model.predict(features) -> int` (`config.REST`/`CONTRACT`),
+  `features(window) -> [rms, mav, wl, zc]`, `METADATA_FIELDS`,
   the `signal.csv` columns `t_s,value,label`, the sample protocol `config.SAMPLE_STEPS` (rest 8 / contract 8 / rest 8 s),
   the serial format `<int>\n`.
 - **Labels come only from the timer** (row number / FS + `SAMPLE_STEPS`), never from the signal or the person.
@@ -72,4 +72,5 @@ python scripts/record.py --source mock              # recording app without hard
 python scripts/make_mock_samples.py && python scripts/evaluate.py --data data/synthetic
 streamlit run dashboard/app.py
 ```
-Each folder has its own CLAUDE.md with the details for that folder.
+Each folder has its own CLAUDE.md with the details and gotchas for that folder.
+Domain words (sample, placement, clean window, rest baseline, …): `GLOSSARY.md`. Use them as defined there.

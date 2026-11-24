@@ -1,5 +1,9 @@
 # Who does what (until 2026-11-24)
 
+> **Historical plan.** The Report 1 table and the numbered steps per person were the plan for 2026-11-03 → 11-21;
+> some steps are outdated (e.g. Person 1 step 1: recording now runs on the ESP32 web page, not `emg_serial`).
+> Current status: `MEMORY.md`. Still valid here: who **owns** which files (used by `/gitup` and `/calib`).
+
 Four roles. Each person owns **their folders**, so nobody edits the same file at the same time.
 Every task = a GitHub issue → a branch `yourname/task` → a PR → CI green + no conflicts → squash merge (`/gitup merge`).
 Start every Claude session with: *"Read MEMORY.md and the CLAUDE.md of <your folder>, then do <task>."*

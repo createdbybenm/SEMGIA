@@ -23,7 +23,8 @@ data/demo/                      # record.py --source file (replay demo) – giti
   ```
 - Web interface samples/calibrations arrive as downloads (`semgia_sample_*.json`, `semgia_calib_*.json`).
   `python scripts/import_web.py` turns them into the folders above (labels from the timer, privacy check, no duplicates).
-- `value` from the web interface = raw 12-bit ESP32 ADC count (0..4095, rest ≈ 2048), same as the serial path.
+- `value` from the web interface = raw 12-bit ESP32 ADC count (0..4095), same as the serial path. Measured rest level with the SEN0240 ≈ 1650 counts (1580–1720 over the
+  2026-11-21 samples); `config.ADC_MID` = 2048 is only the mock signal's centre.
   `calibration.csv` uses the same counts; only `rest_mV` / `max_mV` are mV (the ESP32's own 100 ms RMS).
 - Subject `P000` / operator `OP00` / placement `E00` = test recordings. Don't commit them.
 
