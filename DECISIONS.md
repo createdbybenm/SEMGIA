@@ -19,12 +19,15 @@ hamstrings need to fully relax after the rest cue.
 
 ## 8 Model
 
-Chose: not decided yet. We compare three models on the same four features: logistic regression, linear discriminant
-analysis (LDA) and a random forest. A threshold on RMS (above 3 times rest is contraction, below 2 times rest is rest)
-is the floor every model has to beat, and chance is 67 % because rest is 16 s of every 24 s. In our first
-leave-one-session-out run on the training sessions, logistic regression reached 0.90 on clean windows and 0.85 on all
-windows, LDA 0.90 and 0.85, the random forest 0.88 and 0.83, and the threshold 0.80 and 0.78. We take the one that is
-best on the training sessions and test it once on E06.
+Chose: logistic regression on the four features. We compared it with linear discriminant analysis (LDA) and a random
+forest. A threshold on RMS (above 3 times rest is contraction, below 2 times rest is rest) is the floor every model has
+to beat, and chance is 67 % because rest is 16 s of every 24 s. In the leave-one-session-out run on the training
+sessions, logistic regression reached 0.90 on clean windows and 0.85 on all windows, LDA 0.90 and 0.85, the random
+forest 0.88 and 0.83, and the threshold 0.80 and 0.78. Logistic regression and LDA tied, so we kept the default
+(logistic regression; balanced accuracy 0.881 vs. 0.878 on clean windows). It was chosen before the test session was
+opened. Trained on all 23 training recordings, it scored **0.887 accuracy on all windows** of the test session E06
+(0.949 on clean windows, 10 recordings), against 0.763 for the threshold and 0.665 for chance. On the 2 fatigued test
+recordings it reached 0.824. Limit: this is one test session with 10 recordings; the final class adds 4 new ones.
 
 Reason: we have only 23 usable training recordings, so a simple linear model should transfer best to a new electrode
 placement. Kaufmann et al. 2010 and Young et al. 2011 found that LDA stayed more stable than other models over days and
@@ -55,4 +58,4 @@ and whether the model would be fast enough as TinyML on the ESP32.
   exercise-induced muscle fatigue in chronic low back pain. doi:10.1155/2024/9982411
 - van den Goorbergh R, van Smeden M, Timmerman D, Van Calster B. The harm of class imbalance corrections for risk
   prediction models. JAMIA 2022;29(9):1525-34. doi:10.1093/jamia/ocac093
-- Full train results: `docs/report/results_train.md`.
+- Full train results: `docs/report/results_train.md`. Final test (E06, opened once on 2026-11-24): `docs/report/results_test.md`.
