@@ -72,7 +72,7 @@ unchanged unless the team agrees otherwise.
 | Part | Points | What |
 |---|---|---|
 | Training data | 10 | ≥ 100 recordings of movement + rest, new electrodes every 10, metadata, in GitHub |
-| Test + accuracy | 10 | final class: new electrodes 4 times, data to the cloud (Azure), ≥ 75 % |
+| Test + accuracy | 10 | final class: new electrodes 4 times, data to the cloud (Azure), ≥ 75 % · ours so far: logreg 0.887 on test session E06 (2026-11-24, `docs/report/results_test.md`) |
 | Demo | 10 | live; if hardware fails, the method is graded (→ our `--source file` fallback) |
 | Code design | 15 | small functions, a test each, no secrets; **every member explains the code** |
 | Project notebook (Colab) | 15 | rules, method, results, who did what, what each member learned (5 pts individual) |
